@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شات أونلاين مباشر | Chat App</title>
+    <title>شات أونلاين الشامل | Super Chat App</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -14,6 +14,19 @@
             --text-muted: #94a3b8;
             --msg-me: #2563eb;
             --msg-other: #334155;
+            --input-bg: #0f172a;
+        }
+
+        body.light-theme {
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --msg-me: #2563eb;
+            --msg-other: #e2e8f0;
+            --input-bg: #f8fafc;
         }
 
         body {
@@ -25,44 +38,45 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
         }
 
         .container {
             width: 100%;
-            max-width: 450px;
-            height: 90vh;
+            max-width: 480px;
+            height: 92vh;
             background: var(--card);
             border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border: 1px solid #334155;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* شاشة الدخول */
         .login-screen {
-            padding: 30px 20px;
+            padding: 25px 20px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             height: 100%;
             box-sizing: border-box;
             text-align: center;
+            overflow-y: auto;
         }
 
         .login-screen h2 { margin-bottom: 8px; color: var(--accent); }
-        .login-screen p { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+        .login-screen p { color: var(--text-muted); font-size: 14px; margin-bottom: 15px; }
 
         input {
             width: 100%;
-            padding: 12px 16px;
-            margin-bottom: 12px;
+            padding: 11px 14px;
+            margin-bottom: 10px;
             border-radius: 10px;
-            border: 1px solid #475569;
-            background: #0f172a;
-            color: #fff;
-            font-size: 15px;
+            border: 1px solid var(--text-muted);
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 14px;
             box-sizing: border-box;
             outline: none;
         }
@@ -70,51 +84,77 @@
         input:focus { border-color: var(--accent); }
 
         button {
-            width: 100%;
-            padding: 12px;
+            padding: 10px 14px;
             border-radius: 10px;
             border: none;
             background: var(--accent);
             color: #fff;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
             transition: 0.2s;
         }
 
         button:hover { background: var(--accent-hover); }
 
-        /* شاشة الشات */
-        .chat-screen {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
+        .saved-rooms { margin-top: 15px; text-align: right; }
+        .saved-rooms h4 { margin-bottom: 8px; font-size: 13px; color: var(--text-muted); }
+        .room-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+        .chip {
+            background: var(--msg-other);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
         }
+        .chip:hover { background: var(--accent); color: #fff; }
+
+        .chat-screen { display: flex; flex-direction: column; height: 100%; }
 
         .chat-header {
-            padding: 16px;
-            background: #0f172a;
-            border-bottom: 1px solid #334155;
+            padding: 10px 14px;
+            background: var(--input-bg);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .chat-header h3 { margin: 0; font-size: 16px; }
-        .room-tag { font-size: 12px; background: #334155; padding: 4px 10px; border-radius: 12px; color: var(--text-muted); }
+        .chat-header h3 { margin: 0; font-size: 15px; }
+        .room-tag { font-size: 11px; background: var(--msg-other); padding: 2px 8px; border-radius: 10px; color: var(--text-muted); }
+        .online-count { font-size: 11px; color: #10b981; font-weight: bold; }
+
+        /* الشريط المثبت (Pinned Message Bar) */
+        .pinned-bar {
+            background: rgba(59, 130, 246, 0.15);
+            border-bottom: 1px solid var(--accent);
+            padding: 6px 12px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--accent);
+        }
+
+        .search-bar {
+            padding: 6px 12px;
+            background: var(--input-bg);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .search-bar input { margin-bottom: 0; padding: 6px 10px; font-size: 12px; }
 
         .messages-box {
             flex: 1;
-            padding: 16px;
+            padding: 14px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .message {
-            max-width: 75%;
-            padding: 10px 14px;
+            max-width: 82%;
+            padding: 10px 12px;
             border-radius: 14px;
             font-size: 14px;
             line-height: 1.4;
@@ -125,54 +165,107 @@
         .message.me {
             align-self: flex-start;
             background: var(--msg-me);
+            color: #fff;
             border-bottom-right-radius: 2px;
         }
 
         .message.other {
             align-self: flex-end;
             background: var(--msg-other);
+            color: var(--text);
             border-bottom-left-radius: 2px;
+        }
+
+        .reply-quote {
+            background: rgba(0,0,0,0.2);
+            border-right: 3px solid var(--accent);
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            opacity: 0.9;
         }
 
         .message .user-name {
             font-size: 11px;
             font-weight: bold;
-            color: #93c5fd;
+            color: var(--accent);
             margin-bottom: 3px;
             display: block;
         }
+        .message.me .user-name { color: #93c5fd; }
+        .admin-badge { background: #f59e0b; color: #000; font-size: 9px; padding: 1px 4px; border-radius: 4px; margin-right: 4px; }
 
         .message .time {
             font-size: 9px;
-            color: rgba(255, 255, 255, 0.6);
+            opacity: 0.7;
             margin-top: 4px;
             display: block;
             text-align: left;
         }
 
-        .typing-indicator {
+        .msg-actions {
+            display: flex;
+            gap: 6px;
+            font-size: 11px;
+            margin-top: 5px;
+            opacity: 0.8;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 4px;
+            flex-wrap: wrap;
+        }
+        .msg-actions span { cursor: pointer; }
+        .msg-actions span:hover { text-decoration: underline; }
+
+        .reactions-list { display: flex; gap: 4px; margin-top: 4px; font-size: 11px; }
+        .reaction-badge { background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 10px; }
+
+        .reply-preview {
+            background: var(--msg-other);
+            padding: 6px 12px;
             font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .typing-indicator {
+            font-size: 11px;
             color: var(--text-muted);
-            padding: 4px 16px;
-            height: 18px;
+            padding: 2px 14px;
+            height: 14px;
             font-style: italic;
         }
 
         .chat-input-area {
-            padding: 12px;
-            background: #0f172a;
-            border-top: 1px solid #334155;
+            padding: 10px;
+            background: var(--input-bg);
+            border-top: 1px solid rgba(255,255,255,0.1);
             display: flex;
-            gap: 8px;
+            gap: 6px;
+            align-items: center;
         }
 
-        .chat-input-area input { margin-bottom: 0; }
-        .chat-input-area button { width: auto; padding: 0 20px; }
+        .chat-input-area input { margin-bottom: 0; flex: 1; }
+
+        .record-btn {
+            background: #ef4444;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+        .record-btn.recording { animation: pulse 1s infinite; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .header-btns { display: flex; gap: 4px; }
+        .icon-btn { background: transparent; color: var(--text); padding: 4px 8px; font-size: 13px; border: 1px solid var(--text-muted); }
 
         .hidden { display: none !important; }
     </style>
 
-    <!-- مكتبات Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
@@ -181,11 +274,17 @@
     <div class="container">
         <!-- 1. شاشة الدخول -->
         <div id="login-screen" class="login-screen">
-            <h2>💬 شات أونلاين</h2>
-            <p>أدخل اسمك وكود الغرفة للبدء بالمحادثة</p>
+            <h2>💬 شات أونلاين الشامل</h2>
+            <p>ادخل بياناتك للانضمام إلى المحادثة</p>
             <input type="text" id="username" placeholder="اسمك / اللقب">
-            <input type="text" id="room-code" placeholder="كود الغرفة (مثال: 1234)">
+            <input type="text" id="room-code" placeholder="اسم أو كود الغرفة">
+            <input type="password" id="room-pass" placeholder="كلمة سر الغرفة (اختياري للغرف الخاصة)">
             <button onclick="enterChat()">دخول الشات</button>
+
+            <div class="saved-rooms" id="saved-rooms-div">
+                <h4>غرف سابقة:</h4>
+                <div class="room-chips" id="room-chips"></div>
+            </div>
         </div>
 
         <!-- 2. شاشة المحادثة -->
@@ -194,23 +293,44 @@
                 <div>
                     <h3 id="display-user">مرحباً</h3>
                     <span id="display-room" class="room-tag">غرفة: --</span>
+                    <span id="online-count" class="online-count">🟢 0 متواجد</span>
                 </div>
-                <button onclick="leaveChat()" style="width:auto; padding:6px 12px; font-size:12px; background:#ef4444;">خروج</button>
+                <div class="header-btns">
+                    <button class="icon-btn" onclick="toggleTheme()" title="تغيير الثيم">🌓</button>
+                    <button onclick="leaveChat()" style="background:#ef4444; font-size:11px; padding:4px 8px;">خروج</button>
+                </div>
+            </div>
+
+            <!-- الشريط المثبت -->
+            <div id="pinned-bar" class="pinned-bar hidden">
+                <span id="pinned-text">📌 لا توجد رسائل مثبتة</span>
+                <span onclick="unpinMessage()" style="cursor:pointer;" id="unpin-btn" class="hidden">❌</span>
+            </div>
+
+            <!-- شريط البحث -->
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="🔍 بحث في الرسائل..." oninput="filterMessages()">
             </div>
 
             <div id="messages-box" class="messages-box"></div>
 
             <div id="typing-txt" class="typing-indicator"></div>
 
+            <!-- المعاينة عند الرد -->
+            <div id="reply-preview" class="reply-preview hidden">
+                <span id="reply-preview-txt">رد على: ...</span>
+                <span onclick="cancelReply()" style="cursor:pointer;">❌</span>
+            </div>
+
             <div class="chat-input-area">
-                <input type="text" id="msg-input" placeholder="اكتب رسالتك هنا..." oninput="handleTyping()" onkeypress="checkEnter(event)">
+                <button id="record-btn" class="record-btn" onclick="toggleRecording()" title="تسجيل صوت">🎙️</button>
+                <input type="text" id="msg-input" placeholder="اكتب رسالتك..." oninput="handleTyping()" onkeypress="checkEnter(event)">
                 <button onclick="sendMessage()">إرسال</button>
             </div>
         </div>
     </div>
 
     <script>
-        // إعدادات مشروعك الخاص (social-3108b)
         const firebaseConfig = {
             apiKey: "AIzaSyBDYK-evC0qZWKJupgCakP2Em4X5yT_Qyc",
             authDomain: "social-3108b.firebaseapp.com",
@@ -221,120 +341,337 @@
             databaseURL: "https://social-3108b-default-rtdb.firebaseio.com"
         };
 
-        // تهيئة قاعدة البيانات
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let currentUser = "";
         let currentRoom = "";
+        let roomAdmin = "";
         let typingTimeout = null;
+        let allMessagesCache = {};
+        let activeReplyMsg = null;
 
-        function enterChat() {
+        // التسجيل الصوتي
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
+        window.onload = function() { renderSavedRooms(); };
+
+        function enterChat(selectedRoom = null) {
             const nameIn = document.getElementById('username').value.trim();
-            const roomIn = document.getElementById('room-code').value.trim();
+            const roomIn = selectedRoom || document.getElementById('room-code').value.trim();
+            const passIn = document.getElementById('room-pass').value.trim();
 
             if (!nameIn || !roomIn) {
-                alert("يرجى كتابة الاسم وكود الغرفة أولاً!");
+                alert("يرجى كتابة الاسم وتحديد الغرفة أولاً!");
                 return;
             }
 
-            currentUser = nameIn;
-            currentRoom = roomIn;
+            // التحقق من كلمة السر
+            db.ref(`chat_rooms/${roomIn}/settings`).once('value', snapshot => {
+                const settings = snapshot.val() || {};
 
-            document.getElementById('display-user').innerText = currentUser;
-            document.getElementById('display-room').innerText = "غرفة: " + currentRoom;
+                if (settings.password && settings.password !== passIn) {
+                    alert("كلمة السر الخاصة بهذه الغرفة غير صحيحة!");
+                    return;
+                }
 
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('chat-screen').classList.remove('hidden');
+                // حفظ كلمة السر إذا كانت الغرفة جديدة وتم إدخال كلمة سر
+                if (!settings.password && passIn) {
+                    db.ref(`chat_rooms/${roomIn}/settings`).set({ password: passIn, creator: nameIn });
+                }
 
-            listenForMessages();
-            listenForTyping();
+                // تحديد الأدمن (أول شخص)
+                db.ref(`chat_rooms/${roomIn}/admin`).once('value', adminSnap => {
+                    if (!adminSnap.exists()) {
+                        db.ref(`chat_rooms/${roomIn}/admin`).set(nameIn);
+                        roomAdmin = nameIn;
+                    } else {
+                        roomAdmin = adminSnap.val();
+                    }
+
+                    currentUser = nameIn;
+                    currentRoom = roomIn;
+
+                    saveRoomToLocal(currentRoom);
+
+                    document.getElementById('display-user').innerText = currentUser;
+                    document.getElementById('display-room').innerText = "غرفة: " + currentRoom;
+
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('chat-screen').classList.remove('hidden');
+
+                    setupOnlineStatus();
+                    listenForMessages();
+                    listenForTyping();
+                    listenForPinned();
+                });
+            });
         }
 
-        function sendMessage() {
+        function setupOnlineStatus() {
+            const userRef = db.ref(`chat_rooms/${currentRoom}/online/${currentUser}`);
+            userRef.set(true);
+            userRef.onDisconnect().remove();
+
+            db.ref(`chat_rooms/${currentRoom}/online`).on('value', snapshot => {
+                const users = snapshot.val() || {};
+                document.getElementById('online-count').innerText = `🟢 ${Object.keys(users).length} متواجد`;
+            });
+        }
+
+        function sendMessage(audioBase64 = null) {
             const input = document.getElementById('msg-input');
             const text = input.value.trim();
 
-            if (!text) return;
+            if (!text && !audioBase64) return;
 
             const msgData = {
                 user: currentUser,
-                text: text,
+                text: text || "",
+                audio: audioBase64 || null,
+                replyTo: activeReplyMsg ? activeReplyMsg : null,
                 timestamp: Date.now()
             };
 
-            // حفظ الرسالة في الغرفة المحددة
             db.ref(`chat_rooms/${currentRoom}/messages`).push(msgData);
-
             input.value = "";
+            cancelReply();
             stopTyping();
         }
 
         function listenForMessages() {
-            const messagesBox = document.getElementById('messages-box');
-            
-            // الاستماع للرسائل الجديدة تلقائياً
-            db.ref(`chat_rooms/${currentRoom}/messages`).on('child_added', snapshot => {
-                const msg = snapshot.val();
-                const isMe = msg.user === currentUser;
+            db.ref(`chat_rooms/${currentRoom}/messages`).on('value', snapshot => {
+                allMessagesCache = snapshot.val() || {};
+                renderMessages(allMessagesCache);
+            });
+        }
 
+        function renderMessages(messagesObj) {
+            const messagesBox = document.getElementById('messages-box');
+            messagesBox.innerHTML = "";
+
+            Object.keys(messagesObj).forEach(msgId => {
+                const msg = messagesObj[msgId];
+                const isMe = msg.user === currentUser;
+                const isAdminMsg = msg.user === roomAdmin;
                 const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                // اقتباس الرد
+                let replyHtml = "";
+                if (msg.replyTo) {
+                    replyHtml = `<div class="reply-quote"><b>${escapeHtml(msg.replyTo.user)}:</b> ${escapeHtml(msg.replyTo.text || 'صوت 🎙️')}</div>`;
+                }
+
+                // الصوتيات
+                let audioHtml = "";
+                if (msg.audio) {
+                    audioHtml = `<audio controls src="${msg.audio}" style="max-width:100%; margin-top:5px; height:32px;"></audio>`;
+                }
+
+                // التفاعلات
+                let reactionsHtml = "";
+                if (msg.reactions) {
+                    reactionsHtml = '<div class="reactions-list">';
+                    Object.keys(msg.reactions).forEach(emoji => {
+                        reactionsHtml += `<span class="reaction-badge">${emoji} ${msg.reactions[emoji]}</span>`;
+                    });
+                    reactionsHtml += '</div>';
+                }
+
+                // التحكم بالأزرار
+                let actionsHtml = `
+                    <div class="msg-actions">
+                        <span onclick="setReply('${escapeHtml(msg.user)}', '${escapeHtml(msg.text)}')">↩️ رد</span>
+                        <span onclick="copyText('${escapeHtml(msg.text)}')">📋 نسخ</span>
+                        <span onclick="addReaction('${msgId}', '❤️')">❤️</span>
+                        <span onclick="addReaction('${msgId}', '👍')">👍</span>
+                        <span onclick="addReaction('${msgId}', '😂')">😂</span>
+                `;
+
+                if (currentUser === roomAdmin) {
+                    actionsHtml += `<span onclick="pinMessage('${escapeHtml(msg.text)}')">📌 تثبيت</span>`;
+                }
+
+                if (isMe || currentUser === roomAdmin) {
+                    if (isMe && !msg.audio) actionsHtml += `<span onclick="editMessage('${msgId}', '${escapeHtml(msg.text)}')">✏️</span>`;
+                    actionsHtml += `<span onclick="deleteMessage('${msgId}')" style="color:#ef4444;">🗑️</span>`;
+                }
+                actionsHtml += `</div>`;
 
                 const msgElement = document.createElement('div');
                 msgElement.className = `message ${isMe ? 'me' : 'other'}`;
                 msgElement.innerHTML = `
-                    ${!isMe ? `<span class="user-name">${msg.user}</span>` : ''}
-                    <div>${escapeHtml(msg.text)}</div>
+                    <span class="user-name">${isAdminMsg ? '<span class="admin-badge">👑 الأدمن</span>' : ''}${msg.user}</span>
+                    ${replyHtml}
+                    ${msg.text ? `<div>${escapeHtml(msg.text)}</div>` : ''}
+                    ${audioHtml}
+                    ${reactionsHtml}
+                    ${actionsHtml}
                     <span class="time">${timeStr}</span>
                 `;
 
                 messagesBox.appendChild(msgElement);
-                messagesBox.scrollTop = messagesBox.scrollHeight;
             });
+
+            messagesBox.scrollTop = messagesBox.scrollHeight;
         }
 
-        function handleTyping() {
-            db.ref(`chat_rooms/${currentRoom}/typing/${currentUser}`).set(true);
-
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => {
-                stopTyping();
-            }, 2000);
+        // 1. نظام الردود
+        function setReply(user, text) {
+            activeReplyMsg = { user, text };
+            document.getElementById('reply-preview-txt').innerText = `رد على ${user}: "${text.substring(0, 20)}..."`;
+            document.getElementById('reply-preview').classList.remove('hidden');
         }
 
-        function stopTyping() {
-            db.ref(`chat_rooms/${currentRoom}/typing/${currentUser}`).remove();
+        function cancelReply() {
+            activeReplyMsg = null;
+            document.getElementById('reply-preview').classList.add('hidden');
         }
 
-        function listenForTyping() {
-            db.ref(`chat_rooms/${currentRoom}/typing`).on('value', snapshot => {
-                const typers = snapshot.val() || {};
-                const otherTypers = Object.keys(typers).filter(user => user !== currentUser);
+        // 2. التسجيل الصوتي (Voice Notes)
+        async function toggleRecording() {
+            const btn = document.getElementById('record-btn');
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
 
-                const typingTxt = document.getElementById('typing-txt');
-                if (otherTypers.length > 0) {
-                    typingTxt.innerText = `${otherTypers.join(', ')} يكتب الآن...`;
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = () => {
+                            sendMessage(reader.result);
+                        };
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    btn.classList.add('recording');
+                    btn.innerText = "⏹️";
+                } catch(err) {
+                    alert("لم يتم السماح باستخدام المايك!");
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                btn.classList.remove('recording');
+                btn.innerText = "🎙️";
+            }
+        }
+
+        // 3. الرسائل المثبتة (Pinned Messages)
+        function pinMessage(text) {
+            db.ref(`chat_rooms/${currentRoom}/pinned`).set({ text, user: currentUser });
+        }
+
+        function unpinMessage() {
+            db.ref(`chat_rooms/${currentRoom}/pinned`).remove();
+        }
+
+        function listenForPinned() {
+            db.ref(`chat_rooms/${currentRoom}/pinned`).on('value', snapshot => {
+                const pinned = snapshot.val();
+                const bar = document.getElementById('pinned-bar');
+                if (pinned) {
+                    document.getElementById('pinned-text').innerText = `📌 مثبت بواسطة ${pinned.user}: ${pinned.text}`;
+                    bar.classList.remove('hidden');
+                    if (currentUser === roomAdmin) document.getElementById('unpin-btn').classList.remove('hidden');
                 } else {
-                    typingTxt.innerText = "";
+                    bar.classList.add('hidden');
                 }
             });
         }
 
-        function checkEnter(e) {
-            if (e.key === 'Enter') sendMessage();
+        function addReaction(msgId, emoji) {
+            db.ref(`chat_rooms/${currentRoom}/messages/${msgId}/reactions/${emoji}`).transaction(c => (c || 0) + 1);
         }
 
+        function editMessage(msgId, oldText) {
+            const newText = prompt("تعديل الرسالة:", oldText);
+            if (newText && newText.trim() !== oldText) {
+                db.ref(`chat_rooms/${currentRoom}/messages/${msgId}`).update({ text: newText.trim() });
+            }
+        }
+
+        function deleteMessage(msgId) {
+            if (confirm("هل تريد الحذف؟")) db.ref(`chat_rooms/${currentRoom}/messages/${msgId}`).remove();
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+            alert("تم النسخ!");
+        }
+
+        function filterMessages() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            if (!query) return renderMessages(allMessagesCache);
+            const filtered = {};
+            Object.keys(allMessagesCache).forEach(id => {
+                if (allMessagesCache[id].text && allMessagesCache[id].text.toLowerCase().includes(query)) {
+                    filtered[id] = allMessagesCache[id];
+                }
+            });
+            renderMessages(filtered);
+        }
+
+        function handleTyping() {
+            db.ref(`chat_rooms/${currentRoom}/typing/${currentUser}`).set(true);
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(stopTyping, 2000);
+        }
+
+        function stopTyping() { db.ref(`chat_rooms/${currentRoom}/typing/${currentUser}`).remove(); }
+
+        function listenForTyping() {
+            db.ref(`chat_rooms/${currentRoom}/typing`).on('value', snapshot => {
+                const typers = Object.keys(snapshot.val() || {}).filter(u => u !== currentUser);
+                document.getElementById('typing-txt').innerText = typers.length ? `${typers.join(', ')} يكتب الآن...` : "";
+            });
+        }
+
+        function toggleTheme() { document.body.classList.toggle('light-theme'); }
+        function checkEnter(e) { if (e.key === 'Enter') sendMessage(); }
+
         function leaveChat() {
+            db.ref(`chat_rooms/${currentRoom}/online/${currentUser}`).remove();
             stopTyping();
             db.ref(`chat_rooms/${currentRoom}/messages`).off();
             db.ref(`chat_rooms/${currentRoom}/typing`).off();
+            db.ref(`chat_rooms/${currentRoom}/pinned`).off();
 
             document.getElementById('chat-screen').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
-            document.getElementById('messages-box').innerHTML = "";
+            renderSavedRooms();
         }
 
-        // دالة حماية لمنع الثغرات والتلاعب بالنصوص
+        function saveRoomToLocal(roomName) {
+            let rooms = JSON.parse(localStorage.getItem('my_chat_rooms') || "[]");
+            if (!rooms.includes(roomName)) {
+                rooms.push(roomName);
+                localStorage.setItem('my_chat_rooms', JSON.stringify(rooms));
+            }
+        }
+
+        function renderSavedRooms() {
+            let rooms = JSON.parse(localStorage.getItem('my_chat_rooms') || "[]");
+            const container = document.getElementById('room-chips');
+            container.innerHTML = "";
+            if (rooms.length === 0) return document.getElementById('saved-rooms-div').style.display = "none";
+            document.getElementById('saved-rooms-div').style.display = "block";
+            rooms.forEach(r => {
+                const chip = document.createElement('span');
+                chip.className = "chip";
+                chip.innerText = "# " + r;
+                chip.onclick = () => { document.getElementById('room-code').value = r; enterChat(r); };
+                container.appendChild(chip);
+            });
+        }
+
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.innerText = text;
