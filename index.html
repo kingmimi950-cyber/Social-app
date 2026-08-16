@@ -84,8 +84,11 @@
         .msg-bubble { padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; word-break: break-word; position: relative; }
         .msg-sent .msg-bubble { background: var(--msg-sent); color: #fff; }
         .msg-received .msg-bubble { background: var(--msg-received); border: 1px solid var(--border-color); }
-        .msg-sender { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+        .msg-sender { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
         .seen-status { font-size: 11px; margin-right: 5px; }
+        
+        /* Badges */
+        .user-badge { background: var(--accent-color); color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 8px; font-weight: bold; }
 
         /* Polls */
         .poll-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; margin-top: 5px; }
@@ -158,6 +161,11 @@
                 <h4>قفل المحادثات الخاصة 🔒</h4>
                 <input type="password" id="passcode-input" class="custom-input" placeholder="تعيين رمز سري للشات الخاص" style="margin-top:8px;">
                 <button class="btn-primary" style="margin-top:8px;" onclick="savePasscode()">حفظ الرمز السري</button>
+            </div>
+            <div class="home-card">
+                <h4>الدعم الفني والخدمات 🛠️</h4>
+                <textarea id="support-ticket-text" class="custom-input" placeholder="اكتب استفسارك أو مشكلتك هنا..." style="margin-top:8px; height:70px; resize:none;"></textarea>
+                <button class="btn-primary" style="margin-top:8px;" onclick="sendSupportTicket()">إرسال تذكرة دعم</button>
             </div>
         </div>
 
@@ -233,9 +241,11 @@
         let currentChatPath = "";
         let isRecording = false, mediaRecorder = null, audioChunks = [];
         let badWordsList = [];
+        let usersBadges = {};
 
         window.addEventListener('DOMContentLoaded', () => {
             listenToAdminSettings();
+            listenToUserBadges();
             
             const savedUser = localStorage.getItem('squadlink_user');
             const savedRoom = localStorage.getItem('squadlink_room');
@@ -285,10 +295,29 @@
                     document.getElementById('pinned-bar').classList.remove('hidden');
                 }
 
-                // 5. تحديث قائمة الكلمات المسيئة
+                // 5. تحديث قائمة الكلمات المسيئة (دعم الصيغتين الكائن والمصفوفة)
                 if (settings.badWords) {
-                    badWordsList = Object.values(settings.badWords);
+                    if (Array.isArray(settings.badWords)) {
+                        badWordsList = settings.badWords;
+                    } else if (typeof settings.badWords === 'object') {
+                        badWordsList = Object.keys(settings.badWords).concat(Object.values(settings.badWords));
+                    }
+                } else if (settings.bad_words) {
+                    badWordsList = Object.keys(settings.bad_words);
                 }
+            });
+        }
+
+        // جلب الرتب للشات
+        function listenToUserBadges() {
+            db.ref('users').on('value', (snapshot) => {
+                const users = snapshot.val() || {};
+                usersBadges = {};
+                Object.keys(users).forEach(u => {
+                    if (users[u] && users[u].badge) {
+                        usersBadges[u] = users[u].badge;
+                    }
+                });
             });
         }
 
@@ -305,7 +334,7 @@
         function filterText(text) {
             let filtered = text;
             badWordsList.forEach(word => {
-                if (!word) return;
+                if (!word || typeof word !== 'string') return;
                 const regex = new RegExp(word, "gi");
                 filtered = filtered.replace(regex, "***");
             });
@@ -337,7 +366,7 @@
             document.getElementById('header-avatar').innerText = currentUser.charAt(0).toUpperCase();
 
             // تسجيل المستخدم في الفايربيس للوحة التحكم
-            db.ref('users/' + currentUser).set({ username: currentUser, lastSeen: Date.now() });
+            db.ref('users/' + currentUser).update({ username: currentUser, lastSeen: Date.now() });
             db.ref('rooms/' + currentRoom + '/members/' + currentUser).set({ name: currentUser, online: true });
             db.ref('rooms/' + currentRoom + '/members/' + currentUser).onDisconnect().remove();
 
@@ -449,8 +478,12 @@
             const seenCount = msg.seenBy ? Object.keys(msg.seenBy).length : 0;
             const seenHTML = isMe ? `<span class="seen-status">${seenCount > 0 ? '✔️✔️' : '✔️'}</span>` : '';
 
+            // Badge
+            const badgeText = usersBadges[msg.sender];
+            const badgeHTML = badgeText ? `<span class="user-badge">${badgeText}</span>` : '';
+
             div.innerHTML = `
-                <div class="msg-sender">${msg.sender} ${seenHTML}</div>
+                <div class="msg-sender">${badgeHTML} ${msg.sender} ${seenHTML}</div>
                 <div class="msg-bubble">
                     ${content}
                     <div class="action-bar-sm">
@@ -460,6 +493,22 @@
                 </div>
             `;
             list.appendChild(div);
+        }
+
+        /* Support Tickets */
+        function sendSupportTicket() {
+            const input = document.getElementById('support-ticket-text');
+            const text = input.value.trim();
+            if (!text) return alert("يرجى كتابة نص التذكرة أولاً!");
+
+            db.ref('support_tickets').push({
+                sender: currentUser,
+                message: filterText(text),
+                timestamp: Date.now()
+            });
+
+            alert("تم إرسال تذكرتك للدعم الفني بنجاح!");
+            input.value = "";
         }
 
         /* Private Chat Lock & Themes */
