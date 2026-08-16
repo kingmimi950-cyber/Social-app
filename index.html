@@ -3,88 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Pro App</title>
-    <!-- الأساسيات: Google Fonts و Firebase SDK -->
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>SquadLink Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
     <style>
-        /* تعريف المتغيرات للألوان (دعم الوضع الليلي/النهاري لاحقاً) */
         :root {
-            --primary: #6366f1;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
-            --accent: #22c55e;
-            --msg-sent: #6366f1;
-            --msg-recv: #334155;
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --input-bg: #21262d;
+            --accent-color: #58a6ff;
+            --accent-hover: #1f6feb;
+            --text-color: #c9d1d9;
+            --text-muted: #8b949e;
+            --msg-sent: #238636;
+            --msg-received: #21262d;
+            --border-color: #30363d;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
-        body { background-color: var(--bg); color: var(--text); height: 100vh; display: flex; justify-content: center; align-items: center; }
+        body { background-color: var(--bg-color); color: var(--text-color); height: 100vh; display: flex; justify-content: center; align-items: center; }
 
-        .app-container { width: 100%; max-width: 450px; height: 95vh; background: var(--card); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #334155; position: relative; }
+        .app-container {
+            width: 100%; max-width: 420px; height: 92vh; background: var(--card-bg);
+            border-radius: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column;
+            overflow: hidden; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
 
-        /* شاشة الدخول */
-        #login-screen { position: absolute; inset: 0; background: var(--card); z-index: 100; display: flex; flex-direction: column; justify-content: center; padding: 20px; gap: 15px; }
-        
-        /* الهيدر */
-        #chat-header { padding: 15px; background: #0f172a; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155; }
-        
+        /* شاشة الدخول الجذابة والمنسقة */
+        .login-screen {
+            position: absolute; inset: 0; background: var(--card-bg); z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 25px; gap: 15px;
+        }
+        .login-title { font-size: 24px; font-weight: bold; color: var(--accent-color); margin-bottom: 10px; }
+        .input-group { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+        .input-group label { font-size: 13px; color: var(--text-muted); }
+        .custom-input {
+            width: 100%; padding: 12px 15px; background: var(--input-bg); border: 1px solid var(--border-color);
+            border-radius: 10px; color: #fff; font-size: 14px; outline: none; transition: 0.3s;
+        }
+        .custom-input:focus { border-color: var(--accent-color); }
+        .btn-primary {
+            width: 100%; padding: 12px; background: var(--accent-color); color: #fff; border: none;
+            border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        .btn-primary:hover { background: var(--accent-hover); }
+
+        /* شريط الهيدر العلوي */
+        .chat-header {
+            padding: 12px 16px; background: #010409; border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .header-info { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 38px; height: 38px; background: var(--accent-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; }
+        .room-title { font-size: 15px; font-weight: bold; }
+        .status-dot { width: 8px; height: 8px; background: #238636; border-radius: 50%; display: inline-block; }
+
         /* منطقة الرسائل */
-        #messages-list { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .messages-container { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 80%; }
+        .msg-sent { align-self: flex-start; }
+        .msg-received { align-self: flex-end; }
+        
+        .msg-bubble {
+            padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; word-break: break-word; position: relative;
+        }
+        .msg-sent .msg-bubble { background: var(--msg-sent); color: #fff; border-bottom-left-radius: 2px; }
+        .msg-received .msg-bubble { background: var(--msg-received); color: var(--text-color); border: 1px solid var(--border-color); border-bottom-right-radius: 2px; }
 
-        /* منطقة الإدخال */
-        #input-area { padding: 15px; background: #0f172a; display: flex; gap: 10px; align-items: center; }
-        
-        input { padding: 12px; border-radius: 20px; border: 1px solid #334155; background: #1e293b; color: white; flex: 1; outline: none; }
-        button { padding: 10px 20px; border-radius: 20px; border: none; background: var(--primary); color: white; cursor: pointer; font-weight: bold; }
-        
+        .msg-sender { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+        .msg-time { font-size: 10px; opacity: 0.7; margin-top: 4px; text-align: left; }
+        .reply-preview { background: rgba(0,0,0,0.25); border-right: 3px solid var(--accent-color); padding: 4px 8px; border-radius: 4px; font-size: 11px; margin-bottom: 6px; }
+
+        /* أزرار الإجراءات على الرسالة */
+        .msg-actions { display: flex; gap: 8px; font-size: 11px; color: var(--text-muted); margin-top: 3px; opacity: 0.8; }
+        .msg-actions span { cursor: pointer; }
+        .msg-actions span:hover { color: var(--accent-color); }
+
+        /* شريط الإدخال والرد */
+        .reply-bar { background: #161b22; padding: 8px 12px; font-size: 12px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .input-bar { padding: 12px; background: #010409; border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; }
+        .input-bar input { flex: 1; padding: 10px 14px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 20px; color: #fff; font-size: 14px; outline: none; }
+        .send-btn { background: var(--accent-color); color: #fff; border: none; border-radius: 50%; width: 38px; height: 38px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <!-- 1. شاشة الدخول -->
-        <div id="login-screen">
-            <h2 style="text-align: center; color: var(--primary);">Chat Pro 🚀</h2>
-            <input type="text" id="username-input" placeholder="اسم المستخدم...">
-            <input type="text" id="room-input" placeholder="رمز الغرفة...">
-            <button onclick="saveAndJoin()">دخول الشات</button>
+        <!-- شاشة الدخول بستايل نظيف -->
+        <div id="login-screen" class="login-screen">
+            <div class="login-title">SquadLink Chat ⚡</div>
+            <div class="input-group">
+                <label>اسم المستخدم</label>
+                <input type="text" id="username-input" class="custom-input" placeholder="ادخل اسمك...">
+            </div>
+            <div class="input-group">
+                <label>رمز الغرفة</label>
+                <input type="text" id="room-input" class="custom-input" placeholder="ادخل رمز الغرفة...">
+            </div>
+            <button class="btn-primary" onclick="saveAndJoin()">دخول الشات</button>
         </div>
 
-        <!-- 2. الهيدر -->
-        <div id="chat-header" class="hidden">
-            <h4 id="room-name-display">...</h4>
-            <div id="status-indicator">●</div>
+        <!-- الهيدر -->
+        <div id="chat-header" class="chat-header hidden">
+            <div class="header-info">
+                <div class="avatar" id="header-avatar">G</div>
+                <div>
+                    <div class="room-title" id="room-name-display">غرفة المحادثة</div>
+                    <div style="font-size:11px; color: var(--text-muted);"><span class="status-dot"></span> متصل الان</div>
+                </div>
+            </div>
         </div>
 
-        <!-- 3. الرسائل -->
-        <div id="messages-list" class="hidden"></div>
+        <!-- منطقة المحادثة -->
+        <div id="messages-list" class="messages-container hidden"></div>
 
-        <!-- 4. منطقة الكتابة -->
-        <div id="input-area" class="hidden">
-            <input type="text" id="message-text" placeholder="اكتب رسالة...">
-            <button onclick="sendMsg()">إرسال</button>
+        <!-- شريط معاينة الرد (يظهر عند الرد على رسالة) -->
+        <div id="reply-bar" class="reply-bar hidden">
+            <span id="reply-text">الرد على رسالة...</span>
+            <span style="cursor:pointer; color:#ef4444;" onclick="cancelReply()">✕</span>
+        </div>
+
+        <!-- شريط الكتابة -->
+        <div id="input-bar" class="input-bar hidden">
+            <input type="text" id="message-text" placeholder="اكتب رسالة..." onkeypress="handleKeyPress(event)">
+            <button class="send-btn" onclick="sendMsg()">➤</button>
         </div>
     </div>
 
     <script>
-        // إعدادات الاتصال (سيتم ملؤها في الجزء الثاني)
+        // تهيئة Firebase
         const firebaseConfig = { databaseURL: "https://football-game-2176c-default-rtdb.firebaseio.com" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-                // ==========================================
-        // الجزء الثاني: المتغيرات العامة والحفظ التلقائي
-        // ==========================================
+
         let currentUser = "";
         let currentRoom = "";
-        let replyToMsgId = null;  // لتحديد الرسالة المراد الرد عليها
-        let editMsgId = null;     // لتحديد الرسالة المراد تعديلها
+        let replyToMsg = null;
+        let editMsgId = null;
 
-        // 1. الدخول التلقائي فور فتح الصفحة (زي واتساب)
+        // الدخول التلقائي (مثل واتساب)
         window.addEventListener('DOMContentLoaded', () => {
             const savedUser = localStorage.getItem('chat_user');
             const savedRoom = localStorage.getItem('chat_room');
@@ -92,180 +152,138 @@
             if (savedUser && savedRoom) {
                 document.getElementById('username-input').value = savedUser;
                 document.getElementById('room-input').value = savedRoom;
-                // دخول تلقائي مباشر
                 joinRoom(savedUser, savedRoom);
             }
         });
 
-        // 2. زر الدخول اليدوي / الحفظ
         function saveAndJoin() {
             const user = document.getElementById('username-input').value.trim();
             const room = document.getElementById('room-input').value.trim();
 
             if (!user || !room) {
-                alert("برجاء إدخال اسمك ورمز الغرفة أولاً!");
+                alert("يرجى ملء الاسم ورقم الغرفة!");
                 return;
             }
 
-            // حفظ البيانات في جهاز المستخدم للمرات القادمة
             localStorage.setItem('chat_user', user);
             localStorage.setItem('chat_room', room);
-
             joinRoom(user, room);
         }
 
-        // 3. تهيئة الغرفة والانتقال لشاشة المحادثة
         function joinRoom(user, room) {
             currentUser = user;
             currentRoom = room;
 
-            // إخفاء شاشة الدخول وإظهار واجهة الشات
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('chat-header').classList.remove('hidden');
             document.getElementById('messages-list').classList.remove('hidden');
-            document.getElementById('input-area').classList.remove('hidden');
+            document.getElementById('input-bar').classList.remove('hidden');
 
             document.getElementById('room-name-display').innerText = "غرفة: " + currentRoom;
+            document.getElementById('header-avatar').innerText = currentRoom.charAt(0).toUpperCase();
 
-            // البدء في الاستماع للرسائل الجديدة من Firebase
             listenToMessages();
         }
-               // ==========================================
-        // الجزء الثالث: إرسال، عرض، تعديل وحذف الرسائل
-        // ==========================================
 
-        // 1. الاستماع للرسائل من Firebase والتحديث الفوري
         function listenToMessages() {
             const roomRef = db.ref('rooms/' + currentRoom + '/messages');
-            
             roomRef.on('value', (snapshot) => {
                 const messagesList = document.getElementById('messages-list');
-                messagesList.innerHTML = ""; // تفريغ الشاشة قبل إعادة الرسم
+                messagesList.innerHTML = "";
 
                 const data = snapshot.val();
                 if (!data) return;
 
                 Object.keys(data).forEach((msgId) => {
-                    const msg = data[msgId];
-                    renderMessage(msgId, msg);
+                    renderMessage(msgId, data[msgId]);
                 });
 
-                // التمرير لأسفل تلقائياً عند وصول رسالة جديدة
                 messagesList.scrollTop = messagesList.scrollHeight;
             });
         }
 
-        // 2. دالة إرسال أو تعديل الرسالة
         function sendMsg() {
             const inputField = document.getElementById('message-text');
             const text = inputField.value.trim();
 
             if (!text) return;
 
-            // إذا كنا في وضع "تعديل رسالة قديمة"
             if (editMsgId) {
                 db.ref('rooms/' + currentRoom + '/messages/' + editMsgId).update({
                     text: text,
                     isEdited: true
                 });
                 editMsgId = null;
-                inputField.value = "";
-                return;
+            } else {
+                const newMsgRef = db.ref('rooms/' + currentRoom + '/messages').push();
+                newMsgRef.set({
+                    sender: currentUser,
+                    text: text,
+                    timestamp: Date.now(),
+                    replyTo: replyToMsg ? replyToMsg.text : null
+                });
             }
 
-            // إرسال رسالة جديدة (أو رد على رسالة)
-            const newMsgRef = db.ref('rooms/' + currentRoom + '/messages').push();
-            const msgData = {
-                sender: currentUser,
-                text: text,
-                timestamp: Date.now(),
-                replyTo: replyToMsgId || null
-            };
-
-            newMsgRef.set(msgData);
-
-            // إعادة ضبط الخانات
             inputField.value = "";
-            replyToMsgId = null;
+            cancelReply();
         }
 
-        // 3. رسم وتصميم شكل الرسالة داخل المحادثة
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendMsg();
+        }
+
         function renderMessage(msgId, msg) {
             const messagesList = document.getElementById('messages-list');
             const isMe = msg.sender === currentUser;
 
-            const msgDiv = document.createElement('div');
-            msgDiv.style.display = "flex";
-            msgDiv.style.flexDirection = "column";
-            msgDiv.style.alignItems = isMe ? "flex-end" : "flex-start";
-            msgDiv.style.margin = "5px 0";
+            const wrapper = document.createElement('div');
+            wrapper.className = `msg-wrapper ${isMe ? 'msg-sent' : 'msg-received'}`;
 
             const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            msgDiv.innerHTML = `
-                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 2px;">${msg.sender}</div>
-                <div style="background: ${isMe ? 'var(--msg-sent)' : 'var(--msg-recv)'}; color: white; padding: 10px 14px; border-radius: 12px; max-width: 80%; word-break: break-word; position: relative;">
-                    ${msg.replyTo ? `<div style="background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 6px; font-size: 11px; margin-bottom: 5px;">رد على رسالة...</div>` : ''}
+            wrapper.innerHTML = `
+                <div class="msg-sender">${msg.sender}</div>
+                <div class="msg-bubble">
+                    ${msg.replyTo ? `<div class="reply-preview">رد: ${msg.replyTo}</div>` : ''}
                     <div>${msg.text}</div>
-                    <div style="font-size: 9px; color: #cbd5e1; text-align: left; margin-top: 4px;">
-                        ${timeStr} ${msg.isEdited ? '(معدلة)' : ''}
-                    </div>
+                    <div class="msg-time">${timeStr} ${msg.isEdited ? '• معدلة' : ''}</div>
                 </div>
-                <div style="display: flex; gap: 8px; font-size: 11px; margin-top: 3px; color: #94a3b8; cursor: pointer;">
-                    <span onclick="setReply('${msgId}')">رد</span>
-                    ${isMe ? `<span onclick="setEdit('${msgId}', '${msg.text}')">تعديل</span>` : ''}
+                <div class="msg-actions">
+                    <span onclick="setReply('${msg.text.replace(/'/g, "\'")}')">رد</span>
+                    ${isMe ? `<span onclick="setEdit('${msgId}', '${msg.text.replace(/'/g, "\'")}')">تعديل</span>` : ''}
                     ${isMe ? `<span onclick="deleteMsg('${msgId}')" style="color:#ef4444;">حذف</span>` : ''}
                 </div>
             `;
 
-            messagesList.appendChild(msgDiv);
+            messagesList.appendChild(wrapper);
         }
 
-        // 4. وظائف التحكم بالرسالة (رد، تعديل، حذف)
-        function setReply(msgId) {
-            replyToMsgId = msgId;
-            alert("سيتم الرد على هذه الرسالة.");
+        function setReply(text) {
+            replyToMsg = { text: text };
+            document.getElementById('reply-text').innerText = "رد على: " + text;
+            document.getElementById('reply-bar').classList.remove('hidden');
+        }
+
+        function cancelReply() {
+            replyToMsg = null;
+            editMsgId = null;
+            document.getElementById('reply-bar').classList.add('hidden');
+            document.getElementById('message-text').value = "";
         }
 
         function setEdit(msgId, oldText) {
             editMsgId = msgId;
-            const inputField = document.getElementById('message-text');
-            inputField.value = oldText;
-            inputField.focus();
+            document.getElementById('message-text').value = oldText;
+            document.getElementById('message-text').focus();
+            document.getElementById('reply-text').innerText = "تعديل الرسالة...";
+            document.getElementById('reply-bar').classList.remove('hidden');
         }
 
         function deleteMsg(msgId) {
-            if (confirm("هل تريد حذف هذه الرسالة لدى الجميع؟")) {
+            if (confirm("هل تريد حذف الرسالة؟")) {
                 db.ref('rooms/' + currentRoom + '/messages/' + msgId).remove();
             }
         }
-         // ==========================================
-        // الجزء الرابع والأخير: الريأكشنز، الثيم، والإغلاق
-        // ==========================================
-
-        // 1. نظام الريأكشنز (إضافة إيموجي للرسالة)
-        function addReaction(msgId, emoji) {
-            db.ref('rooms/' + currentRoom + '/messages/' + msgId + '/reactions/' + currentUser).set(emoji);
-        }
-
-        // 2. نظام التبديل بين الوضع الليلي والنهاري
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            if (document.body.classList.contains('light-mode')) {
-                document.documentElement.style.setProperty('--bg', '#f1f5f9');
-                document.documentElement.style.setProperty('--card', '#ffffff');
-                document.documentElement.style.setProperty('--text', '#0f172a');
-            } else {
-                document.documentElement.style.setProperty('--bg', '#0f172a');
-                document.documentElement.style.setProperty('--card', '#1e293b');
-                document.documentElement.style.setProperty('--text', '#f8fafc');
-            }
-        }
     </script>
-
-    <!-- زر التبديل بين الليلي والنهاري (يمكنك وضعه في أي مكان) -->
-    <button onclick="toggleTheme()" style="position:fixed; top:10px; right:10px; padding:5px 10px; font-size:12px;">تغيير اللون</button>
-
 </body>
 </html>
-
