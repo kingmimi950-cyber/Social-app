@@ -176,7 +176,7 @@
                 <input type="file" id="file-input" class="hidden" onchange="handleFileUpload(event)">
                 <button id="mic-btn" class="action-icon" onclick="toggleRecording()">🎤</button>
                 <input type="text" id="message-text" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') sendMsg()">
-                <button class="action-icon" style="background:var(--accent-color); color:#fff;" onclick="sendMsg()">➤</button>
+                <button id="send-msg-btn" class="action-icon" style="background:var(--accent-color); color:#fff;" onclick="sendMsg()">➤</button>
             </div>
         </div>
 
@@ -232,8 +232,11 @@
         let currentRoom = "";
         let currentChatPath = "";
         let isRecording = false, mediaRecorder = null, audioChunks = [];
+        let badWordsList = [];
 
         window.addEventListener('DOMContentLoaded', () => {
+            listenToAdminSettings();
+            
             const savedUser = localStorage.getItem('squadlink_user');
             const savedRoom = localStorage.getItem('squadlink_room');
             if (savedUser && savedRoom) {
@@ -242,6 +245,72 @@
                 joinRoom(savedUser, savedRoom);
             }
         });
+
+        /* --- 0. الربط المباشر مع لوحة الأدمن --- */
+        function listenToAdminSettings() {
+            db.ref('settings').on('value', (snapshot) => {
+                const settings = snapshot.val() || {};
+
+                // 1. وضع الصيانة
+                if (settings.maintenance) {
+                    document.body.innerHTML = "<div style='color:white; text-align:center; padding: 20px;'><h1>🛠️ التطبيق قيد الصيانة حالياً</h1><p style='margin-top:10px; color:#8b949e;'>نعمل على تحسين الخدمات، يرجى العودة لاحقاً.</p></div>";
+                    return;
+                }
+
+                // 2. تجميد المحادثة
+                const msgInput = document.getElementById('message-text');
+                const sendBtn = document.getElementById('send-msg-btn');
+                if (msgInput && sendBtn) {
+                    if (settings.isFrozen) {
+                        msgInput.disabled = true;
+                        msgInput.placeholder = "🛑 الشات مجمد حالياً من الأدمن...";
+                        sendBtn.disabled = true;
+                        sendBtn.style.opacity = "0.5";
+                    } else {
+                        msgInput.disabled = false;
+                        msgInput.placeholder = "اكتب رسالتك...";
+                        sendBtn.disabled = false;
+                        sendBtn.style.opacity = "1";
+                    }
+                }
+
+                // 3. تغيير الثيم الحي (اللون الرئيسي)
+                if (settings.app_theme_color) {
+                    document.documentElement.style.setProperty('--accent-color', settings.app_theme_color);
+                }
+
+                // 4. عرض الرسالة المثبتة القادمة من اللوحة
+                if (settings.pinned_message) {
+                    document.getElementById('pinned-text').innerText = settings.pinned_message;
+                    document.getElementById('pinned-bar').classList.remove('hidden');
+                }
+
+                // 5. تحديث قائمة الكلمات المسيئة
+                if (settings.badWords) {
+                    badWordsList = Object.values(settings.badWords);
+                }
+            });
+        }
+
+        // فحص الحظر
+        function checkUserBan(user) {
+            db.ref('banned_users/' + user).on('value', (snapshot) => {
+                if (snapshot.val() === true) {
+                    document.body.innerHTML = "<div style='color:#ef4444; text-align:center; padding: 20px;'><h1>🚫 تم حظر حسابك من استخدام التطبيق</h1><p style='margin-top:10px; color:#8b949e;'>إذا كنت تعتقد أن هذا عن طريق الخطأ، يرجى التواصل مع الدعم.</p></div>";
+                }
+            });
+        }
+
+        // فلترة النصوص المسيئة
+        function filterText(text) {
+            let filtered = text;
+            badWordsList.forEach(word => {
+                if (!word) return;
+                const regex = new RegExp(word, "gi");
+                filtered = filtered.replace(regex, "***");
+            });
+            return filtered;
+        }
 
         function saveAndJoin() {
             const user = document.getElementById('username-input').value.trim();
@@ -257,6 +326,9 @@
             currentRoom = room;
             currentChatPath = 'rooms/' + currentRoom + '/messages';
 
+            // مراقبة حظر المستخدم فور دخوله
+            checkUserBan(currentUser);
+
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('chat-header').classList.remove('hidden');
             document.getElementById('bottom-nav').classList.remove('hidden');
@@ -264,6 +336,8 @@
             document.getElementById('room-name-display').innerText = "غرفة: " + currentRoom;
             document.getElementById('header-avatar').innerText = currentUser.charAt(0).toUpperCase();
 
+            // تسجيل المستخدم في الفايربيس للوحة التحكم
+            db.ref('users/' + currentUser).set({ username: currentUser, lastSeen: Date.now() });
             db.ref('rooms/' + currentRoom + '/members/' + currentUser).set({ name: currentUser, online: true });
             db.ref('rooms/' + currentRoom + '/members/' + currentUser).onDisconnect().remove();
 
@@ -294,7 +368,6 @@
 
                 Object.keys(data).forEach(id => {
                     const msg = data[id];
-                    // تحديث قراءة الرسالة (Seen)
                     if (msg.sender !== currentUser && (!msg.seenBy || !msg.seenBy[currentUser])) {
                         db.ref(currentChatPath + '/' + id + '/seenBy/' + currentUser).set(true);
                     }
@@ -306,8 +379,13 @@
 
         function sendMsg() {
             const input = document.getElementById('message-text');
-            if (!input.value.trim()) return;
-            db.ref(currentChatPath).push({ sender: currentUser, text: input.value.trim(), timestamp: Date.now() });
+            const rawText = input.value.trim();
+            if (!rawText) return;
+
+            // فلترة الرسالة من الكلمات المسيئة
+            const cleanText = filterText(rawText);
+
+            db.ref(currentChatPath).push({ sender: currentUser, text: cleanText, timestamp: Date.now() });
             input.value = "";
         }
 
@@ -338,8 +416,8 @@
             if (!q || !op1 || !op2) return alert("أكمل بيانات التصويت!");
             
             db.ref(currentChatPath).push({
-                sender: currentUser, isPoll: true, question: q,
-                options: { op1: { text: op1, votes: 0 }, op2: { text: op2, votes: 0 } },
+                sender: currentUser, isPoll: true, question: filterText(q),
+                options: { op1: { text: filterText(op1), votes: 0 }, op2: { text: filterText(op2), votes: 0 } },
                 timestamp: Date.now()
             });
             togglePollModal();
@@ -434,10 +512,19 @@
             });
         }
 
+        function filterMembers() {
+            const q = document.getElementById('search-member-input').value.toLowerCase();
+            document.querySelectorAll('#members-list .member-item').forEach(item => {
+                const name = item.querySelector('span').innerText.toLowerCase();
+                item.style.display = name.includes(q) ? 'flex' : 'none';
+            });
+        }
+
         function postStatus() {
             const text = document.getElementById('status-text').value.trim();
             if (!text) return;
-            db.ref('rooms/' + currentRoom + '/statuses').push({ sender: currentUser, text: text, timestamp: Date.now() });
+            const cleanStatus = filterText(text);
+            db.ref('rooms/' + currentRoom + '/statuses').push({ sender: currentUser, text: cleanStatus, timestamp: Date.now() });
             document.getElementById('status-text').value = "";
         }
 
