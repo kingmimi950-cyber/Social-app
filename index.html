@@ -73,6 +73,14 @@
             outline: none;
         }
 
+        .remember-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
         .login-overlay button {
             padding: 12px;
             border-radius: 10px;
@@ -216,6 +224,23 @@
             margin-top: 5px;
         }
 
+        .chat-img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 5px;
+        }
+
+        .chat-file {
+            display: inline-block;
+            padding: 6px 12px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #93c5fd;
+            text-decoration: none;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
         .typing-status {
             font-size: 12px;
             color: var(--accent);
@@ -230,11 +255,11 @@
             background-color: #0f172a;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             border-top: 1px solid #334155;
         }
 
-        .chat-input-area input {
+        .chat-input-area input[type="text"] {
             flex: 1;
             padding: 10px 15px;
             border-radius: 25px;
@@ -296,6 +321,10 @@
             <h2>💬 تسجيل الدخول</h2>
             <input type="text" id="username" placeholder="اسم المستخدم...">
             <input type="text" id="roomcode" placeholder="رمز الغرفة...">
+            <div class="remember-box">
+                <input type="checkbox" id="remember-me" checked>
+                <label for="remember-me">تذكر حسابي والغرفة</label>
+            </div>
             <button onclick="startChat()">دخول</button>
         </div>
 
@@ -327,6 +356,8 @@
 
         <!-- أدوات الإدخال -->
         <div class="chat-input-area">
+            <input type="file" id="file-uploader" class="hidden" onchange="sendFile(event)">
+            <button class="action-btn" onclick="document.getElementById('file-uploader').click()">📎</button>
             <button id="mic-btn" class="action-btn" onclick="toggleRecord()">🎙️</button>
             <input type="text" id="msg-input" placeholder="اكتب رسالتك هنا..." oninput="onTyping()">
             <button class="send-btn" onclick="sendMsg()">إرسال</button>
@@ -347,13 +378,31 @@
         let audioChunks = [];
         let isRecording = false;
 
+        // استعادة البيانات المحفوظة تلقائياً عند فتح الصفحة
+        window.onload = function() {
+            const savedName = localStorage.getItem('chat_username');
+            const savedRoom = localStorage.getItem('chat_roomcode');
+            if (savedName) document.getElementById('username').value = savedName;
+            if (savedRoom) document.getElementById('roomcode').value = savedRoom;
+        };
+
         function startChat() {
             myName = document.getElementById('username').value.trim();
             myRoom = document.getElementById('roomcode').value.trim();
+            const shouldRemember = document.getElementById('remember-me').checked;
 
             if (!myName || !myRoom) {
                 alert("برجاء كتابة الاسم وكود الغرفة!");
                 return;
+            }
+
+            // حفظ الغرفة والاسم لو الخيار مفعّل
+            if (shouldRemember) {
+                localStorage.setItem('chat_username', myName);
+                localStorage.setItem('chat_roomcode', myRoom);
+            } else {
+                localStorage.removeItem('chat_username');
+                localStorage.removeItem('chat_roomcode');
             }
 
             document.getElementById('login-overlay').classList.add('hidden');
@@ -447,6 +496,33 @@
             stopTyping();
         }
 
+        // إرسال الصور والملفات
+        function sendFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // التأكد من حجم الملف لحماية الأداء (أقل من 3 ميجابايت)
+            if (file.size > 3 * 1024 * 1024) {
+                alert("حجم الملف كبير جداً، يفضل اختيار صورة أو ملف أقل من 3MB.");
+                return;
+            }
+
+            const isImg = file.type.startsWith('image/');
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                db.ref(`chat_rooms/${myRoom}/messages`).push({
+                    sender: myName,
+                    fileData: e.target.result,
+                    fileName: file.name,
+                    type: isImg ? 'image' : 'file',
+                    timestamp: Date.now(),
+                    readBy: false
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
         function displayMsg(key, msg) {
             const container = document.getElementById('chat-messages');
             const isMe = (msg.sender === myName);
@@ -456,6 +532,10 @@
                 body = `<div>${msg.text}</div>`;
             } else if (msg.type === 'audio') {
                 body = `<audio controls src="${msg.fileUrl}"></audio>`;
+            } else if (msg.type === 'image') {
+                body = `<img src="${msg.fileData}" class="chat-img" />`;
+            } else if (msg.type === 'file') {
+                body = `<a href="${msg.fileData}" download="${msg.fileName}" class="chat-file">📁 ${msg.fileName}</a>`;
             }
 
             const seenIcon = msg.readBy ? '<span class="seen-status read">✔✔</span>' : '<span class="seen-status">✔</span>';
@@ -467,7 +547,7 @@
                     <div class="msg-footer">
                         <span>${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                         ${isMe ? `<span id="seen-${key}">${seenIcon}</span>` : ''}
-                        <button onclick="pinMsg('${msg.text || 'رسالة صوتية'}')" style="background:none; border:none; cursor:pointer; font-size:10px;">📌</button>
+                        <button onclick="pinMsg('${msg.text || msg.fileName || 'مرفق/صوت'}')" style="background:none; border:none; cursor:pointer; font-size:10px;">📌</button>
                     </div>
                 </div>
             `;
