@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SquadLink Chat Pro</title>
+    <title>SquadLink Chat & Status</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -13,7 +13,6 @@
             --card-bg: #161b22;
             --input-bg: #21262d;
             --accent-color: #58a6ff;
-            --accent-hover: #1f6feb;
             --text-color: #c9d1d9;
             --text-muted: #8b949e;
             --msg-sent: #238636;
@@ -35,71 +34,63 @@
             position: absolute; inset: 0; background: var(--card-bg); z-index: 100;
             display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 25px; gap: 15px;
         }
-        .login-title { font-size: 24px; font-weight: bold; color: var(--accent-color); margin-bottom: 10px; }
-        .custom-input { width: 100%; padding: 12px 15px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 10px; color: #fff; font-size: 14px; outline: none; margin-bottom: 10px; }
-        .btn-primary { width: 100%; padding: 12px; background: var(--accent-color); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; }
+        .login-title { font-size: 24px; font-weight: bold; color: var(--accent-color); }
+        .custom-input { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 10px; color: #fff; outline: none; }
+        .btn-primary { width: 100%; padding: 12px; background: var(--accent-color); color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        /* Header & Search */
-        .chat-header { padding: 12px 16px; background: #010409; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        /* Header */
+        .chat-header { padding: 12px 16px; background: #010409; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
         .header-info { display: flex; align-items: center; gap: 10px; }
         .avatar { width: 38px; height: 38px; background: var(--accent-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; }
-        .search-bar { flex: 1; min-width: 100%; display: none; }
-        .search-bar input { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); color: #fff; outline: none; font-size: 13px; }
 
-        /* Messages Area */
-        .messages-container { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+        /* Main Content Tabs */
+        .tab-content { flex: 1; overflow-y: auto; display: none; padding: 15px; }
+        .tab-content.active { display: flex; flex-direction: column; gap: 12px; }
+
+        /* Home View */
+        .home-card { background: var(--input-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 10px; }
+
+        /* Messages */
         .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; }
         .msg-sent { align-self: flex-start; }
         .msg-received { align-self: flex-end; }
-        
-        .msg-bubble { padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; word-break: break-word; position: relative; }
-        .msg-sent .msg-bubble { background: var(--msg-sent); color: #fff; border-bottom-left-radius: 2px; }
-        .msg-received .msg-bubble { background: var(--msg-received); color: var(--text-color); border: 1px solid var(--border-color); border-bottom-right-radius: 2px; }
-        
+        .msg-bubble { padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; word-break: break-word; }
+        .msg-sent .msg-bubble { background: var(--msg-sent); color: #fff; }
+        .msg-received .msg-bubble { background: var(--msg-received); border: 1px solid var(--border-color); }
         .msg-sender { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
-        .msg-time { font-size: 10px; opacity: 0.7; margin-top: 4px; display: flex; justify-content: space-between; }
-        .reply-preview { background: rgba(0,0,0,0.25); border-right: 3px solid var(--accent-color); padding: 6px 8px; border-radius: 4px; font-size: 11px; margin-bottom: 6px; }
+        .msg-time { font-size: 10px; opacity: 0.7; margin-top: 4px; }
+        .chat-img { max-width: 100%; border-radius: 8px; margin-top: 5px; }
+        .file-link { color: var(--accent-color); text-decoration: underline; display: block; margin-top: 5px; }
 
-        /* Audio Player Styling */
-        audio { max-width: 100%; height: 35px; margin-top: 5px; outline: none; }
+        /* Statuses */
+        .status-item { background: var(--input-bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 10px; }
+        .status-author { font-weight: bold; font-size: 13px; color: var(--accent-color); }
 
-        /* Actions & Reactions */
-        .msg-actions { display: flex; gap: 10px; font-size: 11px; color: var(--text-muted); margin-top: 5px; opacity: 0.9; }
-        .msg-actions span { cursor: pointer; padding: 2px 4px; border-radius: 4px; }
-        .msg-actions span:hover { background: rgba(255,255,255,0.1); color: var(--accent-color); }
-        .reactions-box { display: flex; gap: 4px; margin-top: 4px; font-size: 14px; }
-        .reaction-btn { cursor: pointer; padding: 2px; border-radius: 4px; transition: 0.2s; }
-        .reaction-btn:hover { transform: scale(1.2); }
+        /* Bottom Nav Navigation */
+        .bottom-nav { height: 60px; background: #010409; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; }
+        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .nav-btn.active { color: var(--accent-color); font-weight: bold; }
+        .nav-btn span { font-size: 18px; }
 
         /* Input Area */
-        .reply-bar { background: #161b22; padding: 8px 12px; font-size: 12px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; color: var(--accent-color); }
-        .input-bar { padding: 12px; background: #010409; border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; }
-        .input-bar input { flex: 1; padding: 10px 14px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 20px; color: #fff; font-size: 14px; outline: none; }
-        .send-btn { background: var(--accent-color); color: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
-        .mic-btn { background: #21262d; border: 1px solid var(--border-color); color: #fff; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
-        .recording-active { background: #ef4444 !important; animation: pulse 1s infinite; }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
+        .input-bar { padding: 10px; background: #010409; border-top: 1px solid var(--border-color); display: flex; gap: 6px; align-items: center; }
+        .input-bar input[type="text"] { flex: 1; padding: 10px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 20px; color: #fff; outline: none; }
+        .action-icon { background: #21262d; border: 1px solid var(--border-color); color: #fff; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
 
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <!-- Audio element for notifications -->
     <audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div class="app-container">
         <!-- Login Screen -->
         <div id="login-screen" class="login-screen">
-            <div class="login-title">SquadLink Pro 🚀</div>
-            <input type="text" id="username-input" class="custom-input" placeholder="اسم المستخدم (مثال: محمد)">
-            <input type="text" id="room-input" class="custom-input" placeholder="رمز الغرفة (مثال: 1234)">
-            <button class="btn-primary" onclick="saveAndJoin()">دخول الشات</button>
+            <div class="login-title">SquadLink Hub 🚀</div>
+            <input type="text" id="username-input" class="custom-input" placeholder="اسم المستخدم">
+            <input type="text" id="room-input" class="custom-input" placeholder="رمز الغرفة">
+            <button class="btn-primary" onclick="saveAndJoin()">دخول التطبيق</button>
         </div>
 
         <!-- Header -->
@@ -107,32 +98,53 @@
             <div class="header-info">
                 <div class="avatar" id="header-avatar">M</div>
                 <div>
-                    <div class="room-title" id="room-name-display">غرفة المحادثة</div>
+                    <div id="room-name-display" style="font-weight:bold;">غرفة المحادثة</div>
                     <div style="font-size:11px; color: #238636;">● متصل الان</div>
                 </div>
             </div>
-            <div>
-                <button onclick="toggleSearch()" style="background:none; border:none; color:white; cursor:pointer; font-size:16px;">🔍</button>
+            <button onclick="logout()" style="background:none; border:none; color:#ef4444; cursor:pointer;">خروج 🚪</button>
+        </div>
+
+        <!-- 1. Home Tab -->
+        <div id="tab-home" class="tab-content hidden">
+            <div class="home-card">
+                <h3>أهلاً بك في SquadLink! 👋</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:5px;">منصتك المتكاملة للشات، المشاركة، والحالات.</p>
             </div>
-            <div id="search-box" class="search-bar">
-                <input type="text" id="search-input" placeholder="ابحث في الرسائل..." onkeyup="searchMessages()">
+            <div class="home-card">
+                <h4>معلومات الغرفة الحالية 🔑</h4>
+                <p id="home-room-id" style="color:var(--accent-color); font-size:18px; margin-top:5px;">-</p>
             </div>
         </div>
 
-        <!-- Messages Area -->
-        <div id="messages-list" class="messages-container hidden"></div>
-
-        <!-- Reply Preview -->
-        <div id="reply-bar" class="reply-bar hidden">
-            <span id="reply-text">الرد على رسالة...</span>
-            <span style="cursor:pointer; color:#ef4444;" onclick="cancelReply()">إلغاء ✕</span>
+        <!-- 2. Chat Tab -->
+        <div id="tab-chat" class="tab-content hidden">
+            <div id="messages-list" style="display:flex; flex-direction:column; gap:10px; flex:1;"></div>
+            
+            <div id="input-bar" class="input-bar">
+                <label class="action-icon" for="file-input">📎</label>
+                <input type="file" id="file-input" class="hidden" onchange="handleFileUpload(event)">
+                <button id="mic-btn" class="action-icon" onclick="toggleRecording()">🎤</button>
+                <input type="text" id="message-text" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') sendMsg()">
+                <button class="action-icon" style="background:var(--accent-color)" onclick="sendMsg()">➤</button>
+            </div>
         </div>
 
-        <!-- Input Area -->
-        <div id="input-bar" class="input-bar hidden">
-            <button id="mic-btn" class="mic-btn" onclick="toggleRecording()">🎤</button>
-            <input type="text" id="message-text" placeholder="اكتب رسالتك..." onkeypress="handleKeyPress(event)">
-            <button class="send-btn" onclick="sendMsg()">➤</button>
+        <!-- 3. Status Tab -->
+        <div id="tab-status" class="tab-content hidden">
+            <div class="home-card">
+                <h4>إضافة حالة جديدة ⭕</h4>
+                <input type="text" id="status-text" class="custom-input" placeholder="ماذا تفكر الآن؟" style="margin: 10px 0;">
+                <button class="btn-primary" onclick="postStatus()">نشر الحالة</button>
+            </div>
+            <div id="statuses-list"></div>
+        </div>
+
+        <!-- Bottom Navigation Bar -->
+        <div id="bottom-nav" class="bottom-nav hidden">
+            <button class="nav-btn" onclick="switchTab('home')" id="nav-home"><span>🏠</span>الرئيسية</button>
+            <button class="nav-btn active" onclick="switchTab('chat')" id="nav-chat"><span>💬</span>الشات</button>
+            <button class="nav-btn" onclick="switchTab('status')" id="nav-status"><span>⭕</span>الحالات</button>
         </div>
     </div>
 
@@ -143,17 +155,10 @@
 
         let currentUser = "";
         let currentRoom = "";
-        let replyToMsgId = null;
-        let replyToText = null;
-        let editMsgId = null;
-        let isFirstLoad = true;
-
-        // Audio Recorder State
+        let isRecording = false;
         let mediaRecorder = null;
         let audioChunks = [];
-        let isRecording = false;
 
-        // 1. الدخول التلقائي
         window.addEventListener('DOMContentLoaded', () => {
             const savedUser = localStorage.getItem('squadlink_user');
             const savedRoom = localStorage.getItem('squadlink_room');
@@ -167,8 +172,7 @@
         function saveAndJoin() {
             const user = document.getElementById('username-input').value.trim();
             const room = document.getElementById('room-input').value.trim();
-            if (!user || !room) { alert("اكتب اسمك ورمز الغرفة!"); return; }
-            
+            if (!user || !room) return alert("من فضلك أدخل البيانات!");
             localStorage.setItem('squadlink_user', user);
             localStorage.setItem('squadlink_room', room);
             joinRoom(user, room);
@@ -180,216 +184,145 @@
 
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('chat-header').classList.remove('hidden');
-            document.getElementById('messages-list').classList.remove('hidden');
-            document.getElementById('input-bar').classList.remove('hidden');
-
+            document.getElementById('bottom-nav').classList.remove('hidden');
+            
             document.getElementById('room-name-display').innerText = "غرفة: " + currentRoom;
+            document.getElementById('home-room-id').innerText = currentRoom;
             document.getElementById('header-avatar').innerText = currentUser.charAt(0).toUpperCase();
 
+            switchTab('chat');
             listenToMessages();
+            listenToStatuses();
         }
 
-        // 2. استقبال وعرض الرسائل
-        function listenToMessages() {
-            const roomRef = db.ref('rooms/' + currentRoom + '/messages');
-            roomRef.on('value', (snapshot) => {
-                const messagesList = document.getElementById('messages-list');
-                messagesList.innerHTML = "";
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active', 'hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
 
+            document.getElementById('tab-' + tabName).classList.add('active');
+            document.getElementById('nav-' + tabName).classList.add('active');
+        }
+
+        /* Chat Logic */
+        function listenToMessages() {
+            db.ref('rooms/' + currentRoom + '/messages').on('value', (snapshot) => {
+                const list = document.getElementById('messages-list');
+                list.innerHTML = "";
                 const data = snapshot.val();
                 if (!data) return;
 
-                const msgKeys = Object.keys(data);
-                msgKeys.forEach((msgId) => {
-                    renderMessage(msgId, data[msgId]);
-                });
-
-                if (!isFirstLoad) {
-                    const lastMsgKey = msgKeys[msgKeys.length - 1];
-                    if (data[lastMsgKey].sender !== currentUser) {
-                        document.getElementById('notif-sound').play().catch(e => console.log("Auto-play blocked"));
-                    }
-                }
-                isFirstLoad = false;
-                messagesList.scrollTop = messagesList.scrollHeight;
+                Object.keys(data).forEach(id => renderMessage(data[id]));
+                list.parentElement.scrollTop = list.parentElement.scrollHeight;
             });
         }
 
-        // 3. إرسال وتعديل الرسائل النصية
         function sendMsg() {
-            const inputField = document.getElementById('message-text');
-            const text = inputField.value.trim();
-            if (!text) return;
-
-            if (editMsgId) {
-                db.ref('rooms/' + currentRoom + '/messages/' + editMsgId).update({ text: text, isEdited: true });
-                editMsgId = null;
-            } else {
-                const newMsgRef = db.ref('rooms/' + currentRoom + '/messages').push();
-                newMsgRef.set({
-                    sender: currentUser,
-                    text: text,
-                    timestamp: Date.now(),
-                    replyTo: replyToText || null,
-                    reactions: {}
-                });
-            }
-
-            inputField.value = "";
-            cancelReply();
+            const input = document.getElementById('message-text');
+            if (!input.value.trim()) return;
+            db.ref('rooms/' + currentRoom + '/messages').push({
+                sender: currentUser, text: input.value.trim(), timestamp: Date.now()
+            });
+            input.value = "";
         }
 
-        // 4. التسجيل الصوتي (Voice Notes)
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 1.5 * 1024 * 1024) return alert("الحد الأقصى للملف 1.5 ميجابايت");
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                db.ref('rooms/' + currentRoom + '/messages').push({
+                    sender: currentUser,
+                    fileData: evt.target.result,
+                    fileName: file.name,
+                    fileType: file.type,
+                    timestamp: Date.now()
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
         async function toggleRecording() {
             const micBtn = document.getElementById('mic-btn');
-
             if (!isRecording) {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-
-                    mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-
-                    mediaRecorder.onstop = async () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        const reader = new FileReader();
-                        reader.readAsDataURL(audioBlob);
-                        reader.onloadend = () => {
-                            const base64Audio = reader.result;
-                            sendAudioMsg(base64Audio);
-                        };
-                        stream.getTracks().forEach(track => track.stop());
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const r = new FileReader();
+                    r.onloadend = () => {
+                        db.ref('rooms/' + currentRoom + '/messages').push({
+                            sender: currentUser, audio: r.result, timestamp: Date.now()
+                        });
                     };
-
-                    mediaRecorder.start();
-                    isRecording = true;
-                    micBtn.classList.add('recording-active');
-                    micBtn.innerText = '⏹️';
-                } catch (err) {
-                    alert("يرجى السماح بالوصول للميكروفون لتسجيل الفويس!");
-                }
+                    r.readAsDataURL(blob);
+                    stream.getTracks().forEach(t => t.stop());
+                };
+                mediaRecorder.start();
+                isRecording = true;
+                micBtn.style.background = "#ef4444";
             } else {
                 mediaRecorder.stop();
                 isRecording = false;
-                micBtn.classList.remove('recording-active');
-                micBtn.innerText = '🎤';
+                micBtn.style.background = "#21262d";
             }
         }
 
-        function sendAudioMsg(base64Audio) {
-            const newMsgRef = db.ref('rooms/' + currentRoom + '/messages').push();
-            newMsgRef.set({
-                sender: currentUser,
-                audio: base64Audio,
-                timestamp: Date.now(),
-                replyTo: replyToText || null,
-                reactions: {}
-            });
-            cancelReply();
-        }
-
-        function handleKeyPress(e) { if (e.key === 'Enter') sendMsg(); }
-
-        // 5. بناء هيكل الرسالة في الشاشة
-        function renderMessage(msgId, msg) {
-            const messagesList = document.getElementById('messages-list');
+        function renderMessage(msg) {
+            const list = document.getElementById('messages-list');
             const isMe = msg.sender === currentUser;
-            const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const div = document.createElement('div');
+            div.className = `msg-wrapper ${isMe ? 'msg-sent' : 'msg-received'}`;
 
-            const wrapper = document.createElement('div');
-            wrapper.className = `msg-wrapper ${isMe ? 'msg-sent' : 'msg-received'} msg-item`;
-            wrapper.setAttribute('data-text', (msg.text || "صوت").toLowerCase());
-
-            let reactionsHTML = '';
-            if (msg.reactions) {
-                const reactionCounts = {};
-                Object.values(msg.reactions).forEach(r => reactionCounts[r] = (reactionCounts[r] || 0) + 1);
-                for (let r in reactionCounts) { reactionsHTML += `<span>${r} ${reactionCounts[r]}</span> `; }
+            let content = msg.text ? `<div>${msg.text}</div>` : '';
+            if (msg.audio) content += `<audio controls src="${msg.audio}" style="max-width:100%; height:30px;"></audio>`;
+            if (msg.fileData) {
+                if (msg.fileType.startsWith('image/')) {
+                    content += `<img src="${msg.fileData}" class="chat-img" />`;
+                } else {
+                    content += `<a href="${msg.fileData}" download="${msg.fileName}" class="file-link">📁 ${msg.fileName}</a>`;
+                }
             }
 
-            const safeText = msg.text ? msg.text.replace(/'/g, "\\'").replace(/"/g, '&quot;') : "تسجيل صوتي";
-
-            wrapper.innerHTML = `
+            div.innerHTML = `
                 <div class="msg-sender">${msg.sender}</div>
-                <div class="msg-bubble">
-                    ${msg.replyTo ? `<div class="reply-preview">رد على: ${msg.replyTo}</div>` : ''}
-                    
-                    ${msg.text ? `<div>${msg.text}</div>` : ''}
-                    ${msg.audio ? `<audio controls src="${msg.audio}"></audio>` : ''}
-                    
-                    <div class="reactions-box" style="color:yellow;">${reactionsHTML}</div>
-                    
-                    <div class="msg-time">
-                        <span>${timeStr} ${msg.isEdited ? '(معدلة)' : ''}</span>
-                    </div>
-                </div>
-                
-                <div class="msg-actions">
-                    <span class="reaction-btn" onclick="addReaction('${msgId}', '👍')">👍</span>
-                    <span class="reaction-btn" onclick="addReaction('${msgId}', '❤️')">❤️</span>
-                    <span class="reaction-btn" onclick="addReaction('${msgId}', '😂')">😂</span>
-                    
-                    <span onclick="setReply('${safeText}')">رد ↩️</span>
-                    ${msg.text ? `<span onclick="copyMsg('${safeText}')">نسخ 📋</span>` : ''}
-                    ${isMe && msg.text ? `<span onclick="setEdit('${msgId}', '${safeText}')">تعديل ✏️</span>` : ''}
-                    ${isMe ? `<span onclick="deleteMsg('${msgId}')" style="color:#ef4444;">حذف 🗑️</span>` : ''}
-                </div>
+                <div class="msg-bubble">${content}</div>
             `;
-            messagesList.appendChild(wrapper);
+            list.appendChild(div);
         }
 
-        // 6. باقي الميزات
-        function setReply(text) {
-            replyToText = text;
-            document.getElementById('reply-text').innerText = "رد على: " + text.substring(0, 20) + "...";
-            document.getElementById('reply-bar').classList.remove('hidden');
-            document.getElementById('message-text').focus();
-        }
-
-        function cancelReply() {
-            replyToText = null;
-            editMsgId = null;
-            document.getElementById('reply-bar').classList.add('hidden');
-            document.getElementById('message-text').value = "";
-        }
-
-        function setEdit(msgId, oldText) {
-            editMsgId = msgId;
-            document.getElementById('message-text').value = oldText;
-            document.getElementById('reply-text').innerText = "وضع تعديل الرسالة...";
-            document.getElementById('reply-bar').classList.remove('hidden');
-            document.getElementById('message-text').focus();
-        }
-
-        function deleteMsg(msgId) {
-            if (confirm("حذف الرسالة للجميع؟")) {
-                db.ref('rooms/' + currentRoom + '/messages/' + msgId).remove();
-            }
-        }
-
-        function copyMsg(text) {
-            navigator.clipboard.writeText(text);
-            alert("تم نسخ الرسالة!");
-        }
-
-        function addReaction(msgId, emoji) {
-            db.ref('rooms/' + currentRoom + '/messages/' + msgId + '/reactions/' + currentUser).set(emoji);
-        }
-
-        function toggleSearch() {
-            const searchBox = document.getElementById('search-box');
-            searchBox.style.display = searchBox.style.display === 'block' ? 'none' : 'block';
-            if (searchBox.style.display === 'block') document.getElementById('search-input').focus();
-        }
-
-        function searchMessages() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const messages = document.querySelectorAll('.msg-item');
-            messages.forEach(msg => {
-                const text = msg.getAttribute('data-text');
-                msg.style.display = text.includes(query) ? 'flex' : 'none';
+        /* Statuses Logic */
+        function postStatus() {
+            const text = document.getElementById('status-text').value.trim();
+            if (!text) return;
+            db.ref('rooms/' + currentRoom + '/statuses').push({
+                sender: currentUser, text: text, timestamp: Date.now()
             });
+            document.getElementById('status-text').value = "";
+        }
+
+        function listenToStatuses() {
+            db.ref('rooms/' + currentRoom + '/statuses').on('value', (snapshot) => {
+                const list = document.getElementById('statuses-list');
+                list.innerHTML = "";
+                const data = snapshot.val();
+                if (!data) return;
+
+                Object.values(data).reverse().forEach(s => {
+                    const item = document.createElement('div');
+                    item.className = "status-item";
+                    item.innerHTML = `<div class="status-author">${s.sender}</div><div>${s.text}</div>`;
+                    list.appendChild(item);
+                });
+            });
+        }
+
+        function logout() {
+            localStorage.clear();
+            location.reload();
         }
     </script>
 </body>
