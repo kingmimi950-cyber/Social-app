@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق المحادثة المتقدم - تطوير محمد خميس</title>
+    <title>تطبيق الشات - تطوير محمد خميس</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -15,9 +15,8 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 10px; height: 100vh; }
-        .chat-container { width: 100%; max-width: 480px; background: var(--card); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #334155; height: 100%; }
+        .chat-container { width: 100%; max-width: 480px; background: var(--card); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #334155; height: 100%; position: relative; }
         
-        /* Header */
         .chat-header { padding: 12px 16px; background: #0f172a; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
         .user-info { display: flex; align-items: center; gap: 10px; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; position: relative; }
@@ -25,27 +24,20 @@
         .status-dot.online { background: var(--green); }
         .dev-tag { font-size: 10px; background: rgba(59, 130, 246, 0.2); color: #93c5fd; padding: 2px 8px; border-radius: 12px; border: 1px solid var(--accent); }
 
-        /* Pinned Message Bar */
         .pinned-bar { background: #1a2234; padding: 8px 12px; border-bottom: 1px solid #334155; font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
         .pinned-bar span { color: var(--text); font-weight: bold; }
 
-        /* Chat Messages */
         .chat-box { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         .msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 14px; position: relative; word-break: break-word; }
         .msg.sent { align-self: flex-start; background: #2563eb; color: #fff; border-bottom-right-radius: 2px; }
         .msg.received { align-self: flex-end; background: #334155; color: #fff; border-bottom-left-radius: 2px; }
         
         .msg-meta { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; opacity: 0.8; margin-top: 4px; }
-        .seen-status { font-weight: bold; }
-        .seen-status.read { color: #38bdf8; }
+        .seen-status.read { color: #38bdf8; font-weight: bold; }
 
-        .img-msg { max-width: 100%; border-radius: 8px; margin-top: 4px; }
         audio { max-width: 100%; height: 36px; margin-top: 4px; }
-
-        /* Typing Indicator */
         .typing-txt { font-size: 11px; color: var(--green); padding: 4px 16px; font-style: italic; min-height: 20px; }
 
-        /* Input Controls */
         .input-area { padding: 10px; background: #0f172a; border-top: 1px solid #334155; display: flex; gap: 6px; align-items: center; }
         input[type="text"] { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #334155; background: #1e293b; color: #fff; font-size: 14px; outline: none; }
         
@@ -55,26 +47,26 @@
 
         .send-btn { background: var(--accent); border: none; color: #fff; padding: 0 16px; height: 36px; border-radius: 18px; font-weight: bold; cursor: pointer; }
         
-        .login-screen { position: absolute; inset: 0; background: var(--bg); z-index: 50; display: flex; flex-direction: column; justify-content: center; padding: 20px; gap: 10px; }
-        .login-screen input { width: 100%; margin-bottom: 10px; }
+        .login-screen { position: absolute; inset: 0; background: var(--bg); z-index: 50; display: flex; flex-direction: column; justify-content: center; padding: 20px; gap: 12px; }
+        .login-screen input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #fff; }
         .hidden { display: none !important; }
     </style>
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
 
     <div class="chat-container">
-        <!-- شاشة تسجيل الدخول -->
+        <!-- شاشة الدخول -->
         <div id="login-screen" class="login-screen">
-            <h2 style="text-align:center; margin-bottom:10px;">💬 مرحباً بك في الشات</h2>
+            <h2 style="text-align:center;">💬 دخول الشات</h2>
             <input type="text" id="user-input" placeholder="اكتب اسمك...">
-            <input type="text" id="room-input" placeholder="كود الغرفة...">
-            <button class="send-btn" style="width:100%; height:42px;" onclick="initChat()">دخول المحادثة</button>
+            <input type="text" id="room-input" placeholder="اسم أو كود الغرفة...">
+            <button class="send-btn" style="width:100%; height:45px;" onclick="initChat()">دخول المحادثة</button>
         </div>
 
-        <!-- الهيدر والمعلومات -->
+        <!-- رأس التطبيق -->
         <div class="chat-header">
             <div class="user-info">
                 <div class="avatar">
@@ -89,7 +81,7 @@
             <div class="dev-tag">تطوير: محمد خميس 👑</div>
         </div>
 
-        <!-- شريط الرسالة المثبتة -->
+        <!-- تثبيت الرسائل -->
         <div id="pinned-bar" class="pinned-bar hidden">
             <div>📌 مثبت: <span id="pinned-text">--</span></div>
             <button onclick="unpinMessage()" style="background:none; border:none; color:var(--muted); cursor:pointer;">✕</button>
@@ -101,12 +93,9 @@
         <!-- جاري الكتابة -->
         <div id="typing-indicator" class="typing-txt"></div>
 
-        <!-- أدوات الإدخال والإرسال -->
+        <!-- الإدخال -->
         <div class="input-area">
-            <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFileUpload(event)">
-            <button class="icon-btn" onclick="document.getElementById('file-input').click()">📷</button>
             <button id="mic-btn" class="icon-btn" onclick="toggleAudioRecord()">🎙️</button>
-            
             <input type="text" id="msg-input" placeholder="اكتب رسالة..." oninput="handleTyping()">
             <button class="send-btn" onclick="sendTextMessage()">إرسال</button>
         </div>
@@ -126,17 +115,12 @@
         let audioChunks = [];
         let isRecording = false;
 
-        // تفعيل الإشعارات
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
-
         function initChat() {
             currentUser = document.getElementById('user-input').value.trim();
             currentRoom = document.getElementById('room-input').value.trim();
 
-            if (!currentUser || !roomIn) {
-                alert("يرجى كتابة الاسم وكود الغرفة!");
+            if (!currentUser || !currentRoom) {
+                alert("يرجى إدخال اسمك واسم الغرفة!");
                 return;
             }
 
@@ -144,12 +128,12 @@
             document.getElementById('room-title').innerText = "غرفة: " + currentRoom;
             document.getElementById('avatar-char').innerText = currentUser.charAt(0).toUpperCase();
 
-            // 1. التواجد وحالة الاتصال
+            // حالة التواجد
             const userPresenceRef = db.ref(`chat_rooms/${currentRoom}/users/${currentUser}`);
-            userPresenceRef.set({ online: true, lastSeen: Date.now() });
-            userPresenceRef.onDisconnect().set({ online: false, lastSeen: Date.now() });
+            userPresenceRef.set({ online: true });
+            userPresenceRef.onDisconnect().set({ online: false });
 
-            // الاستماع لحالة المستخدمين الآخرين
+            // متابعة متصلي الغرفة
             db.ref(`chat_rooms/${currentRoom}/users`).on('value', snapshot => {
                 const users = snapshot.val() || {};
                 let isOtherOnline = false;
@@ -168,21 +152,18 @@
                 }
             });
 
-            // 2. الاستماع للرسائل
+            // استلام الرسائل
             db.ref(`chat_rooms/${currentRoom}/messages`).on('child_added', snapshot => {
                 const msg = snapshot.val();
                 const msgKey = snapshot.key;
                 renderMessage(msgKey, msg);
 
-                // تم تحديث القراءة (Seen) إذا كانت الرسالة موجهة لي
                 if (msg.sender !== currentUser && !msg.readBy) {
                     db.ref(`chat_rooms/${currentRoom}/messages/${msgKey}/readBy`).set(true);
-                    playNotificationSound();
-                    showNotification(msg.sender, msg.text || "أرسل مرفقاً صوتاً/صورة");
                 }
             });
 
-            // الاستماع لتغييرات حالة القراءة (Seen Update)
+            // تحديث حالة القراءة (Seen)
             db.ref(`chat_rooms/${currentRoom}/messages`).on('child_changed', snapshot => {
                 const msgKey = snapshot.key;
                 const msg = snapshot.val();
@@ -193,7 +174,7 @@
                 }
             });
 
-            // 3. الاستماع لمؤشر الكتابة
+            // مؤشر الكتابة
             db.ref(`chat_rooms/${currentRoom}/typing`).on('value', snapshot => {
                 const typingUser = snapshot.val();
                 const indicator = document.getElementById('typing-indicator');
@@ -204,7 +185,7 @@
                 }
             });
 
-            // 4. الاستماع للرسالة المثبتة
+            // الرسالة المثبتة
             db.ref(`chat_rooms/${currentRoom}/pinned`).on('value', snapshot => {
                 const pinnedText = snapshot.val();
                 const bar = document.getElementById('pinned-bar');
@@ -241,8 +222,6 @@
             let contentHTML = '';
             if (msg.type === 'text') {
                 contentHTML = `<div>${msg.text}</div>`;
-            } else if (msg.type === 'image') {
-                contentHTML = `<img src="${msg.fileUrl}" class="img-msg" />`;
             } else if (msg.type === 'audio') {
                 contentHTML = `<audio controls src="${msg.fileUrl}"></audio>`;
             }
@@ -256,7 +235,7 @@
                     <div class="msg-meta">
                         <span>${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                         ${isMe ? `<span id="seen-${key}">${seenIcon}</span>` : ''}
-                        <button onclick="pinMessage('${msg.text || 'مرفق'}')" style="background:none; border:none; cursor:pointer; font-size:10px;">📌</button>
+                        <button onclick="pinMessage('${msg.text || 'رسالة صوتية'}')" style="background:none; border:none; cursor:pointer; font-size:10px;">📌</button>
                     </div>
                 </div>
             `;
@@ -265,7 +244,6 @@
             box.scrollTop = box.scrollHeight;
         }
 
-        // الكتابة وتنبيهها
         function handleTyping() {
             db.ref(`chat_rooms/${currentRoom}/typing`).set(currentUser);
             clearTimeout(typingTimeout);
@@ -276,7 +254,7 @@
             db.ref(`chat_rooms/${currentRoom}/typing`).set("");
         }
 
-        // الرسائل الصوتية (Voice Messages)
+        // تسجيل وصوتيات
         async function toggleAudioRecord() {
             const micBtn = document.getElementById('mic-btn');
             if (!isRecording) {
@@ -286,15 +264,14 @@
                     audioChunks = [];
 
                     mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
-                    mediaRecorder.onstop = async () => {
+                    mediaRecorder.onstop = () => {
                         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                         const reader = new FileReader();
                         reader.readAsDataURL(audioBlob);
                         reader.onloadend = () => {
-                            const base64Audio = reader.result;
                             db.ref(`chat_rooms/${currentRoom}/messages`).push({
                                 sender: currentUser,
-                                fileUrl: base64Audio,
+                                fileUrl: reader.result,
                                 type: 'audio',
                                 timestamp: Date.now(),
                                 readBy: false
@@ -306,7 +283,7 @@
                     isRecording = true;
                     micBtn.classList.add('recording');
                 } catch (err) {
-                    alert("يرجى إعطاء صلاحية الميكروفون لاستخدام الصوتيات!");
+                    alert("يرجى تفعيل صلاحية الميكروفون!");
                 }
             } else {
                 mediaRecorder.stop();
@@ -315,47 +292,12 @@
             }
         }
 
-        // إرسال الصور (Image Upload)
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                db.ref(`chat_rooms/${currentRoom}/messages`).push({
-                    sender: currentUser,
-                    fileUrl: e.target.result,
-                    type: 'image',
-                    timestamp: Date.now(),
-                    readBy: false
-                });
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // تثبيت الرسائل
         function pinMessage(text) {
             db.ref(`chat_rooms/${currentRoom}/pinned`).set(text);
         }
 
         function unpinMessage() {
             db.ref(`chat_rooms/${currentRoom}/pinned`).remove();
-        }
-
-        // صوت وتنبيه الإشعارات
-        function playNotificationSound() {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            osc.connect(ctx.destination);
-            osc.frequency.value = 587.33;
-            osc.start();
-            osc.stop(ctx.currentTime + 0.15);
-        }
-
-        function showNotification(sender, body) {
-            if (Notification.permission === "granted" && document.hidden) {
-                new Notification(`رسالة جديدة من ${sender}`, { body: body });
-            }
         }
     </script>
 </body>
