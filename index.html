@@ -3,551 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق الشات الاحترافي | Ultimate Chat App</title>
-    
-    <!-- إعدادات PWA لتثبيت التطبيق على الهاتف -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJzaG9ydF9uYW1lIjogIlNoYXRBcHAiLAogICJuYW1lIjogIlVs dGltYXRlIENoYXQgQXBwIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZjE3MmEiLAogICJ0aGVtZV9jb2xvciI6ICIjM2I4MmY2Igp9">
-
+    <title>تطبيق المحادثة المتقدم - تطوير محمد خميس</title>
     <style>
         :root {
             --bg: #0f172a;
             --card: #1e293b;
             --accent: #3b82f6;
-            --accent-hover: #2563eb;
+            --green: #10b981;
             --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --msg-me: #2563eb;
-            --msg-other: #334155;
-            --input-bg: #0f172a;
+            --muted: #94a3b8;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 10px; height: 100vh; }
+        .chat-container { width: 100%; max-width: 480px; background: var(--card); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #334155; height: 100%; }
+        
+        /* Header */
+        .chat-header { padding: 12px 16px; background: #0f172a; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; position: relative; }
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #64748b; position: absolute; bottom: 0; left: 0; border: 2px solid var(--card); }
+        .status-dot.online { background: var(--green); }
+        .dev-tag { font-size: 10px; background: rgba(59, 130, 246, 0.2); color: #93c5fd; padding: 2px 8px; border-radius: 12px; border: 1px solid var(--accent); }
 
-        body.light-theme {
-            --bg: #f1f5f9;
-            --card: #ffffff;
-            --accent: #2563eb;
-            --text: #0f172a;
-            --text-muted: #64748b;
-            --msg-me: #2563eb;
-            --msg-other: #e2e8f0;
-            --input-bg: #f8fafc;
-        }
+        /* Pinned Message Bar */
+        .pinned-bar { background: #1a2234; padding: 8px 12px; border-bottom: 1px solid #334155; font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+        .pinned-bar span { color: var(--text); font-weight: bold; }
 
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+        /* Chat Messages */
+        .chat-box { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 14px; position: relative; word-break: break-word; }
+        .msg.sent { align-self: flex-start; background: #2563eb; color: #fff; border-bottom-right-radius: 2px; }
+        .msg.received { align-self: flex-end; background: #334155; color: #fff; border-bottom-left-radius: 2px; }
+        
+        .msg-meta { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; opacity: 0.8; margin-top: 4px; }
+        .seen-status { font-weight: bold; }
+        .seen-status.read { color: #38bdf8; }
 
-        .container {
-            width: 100%;
-            max-width: 500px;
-            height: 95vh;
-            background: var(--card);
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
+        .img-msg { max-width: 100%; border-radius: 8px; margin-top: 4px; }
+        audio { max-width: 100%; height: 36px; margin-top: 4px; }
 
-        .login-screen {
-            padding: 25px 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            height: 100%;
-            box-sizing: border-box;
-            text-align: center;
-            overflow-y: auto;
-        }
+        /* Typing Indicator */
+        .typing-txt { font-size: 11px; color: var(--green); padding: 4px 16px; font-style: italic; min-height: 20px; }
 
-        .login-screen h2 { margin-bottom: 8px; color: var(--accent); }
-        .login-screen p { color: var(--text-muted); font-size: 13px; margin-bottom: 15px; }
+        /* Input Controls */
+        .input-area { padding: 10px; background: #0f172a; border-top: 1px solid #334155; display: flex; gap: 6px; align-items: center; }
+        input[type="text"] { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #334155; background: #1e293b; color: #fff; font-size: 14px; outline: none; }
+        
+        .icon-btn { background: #334155; border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; }
+        .icon-btn.recording { background: #ef4444; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-        input, select {
-            width: 100%;
-            padding: 10px 12px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            border: 1px solid var(--text-muted);
-            background: var(--input-bg);
-            color: var(--text);
-            font-size: 13px;
-            box-sizing: border-box;
-            outline: none;
-        }
-
-        button {
-            padding: 10px 14px;
-            border-radius: 10px;
-            border: none;
-            background: var(--accent);
-            color: #fff;
-            font-weight: bold;
-            font-size: 13px;
-            cursor: pointer;
-        }
-
-        .avatar-picker { display: flex; justify-content: center; gap: 10px; margin-bottom: 12px; }
-        .avatar-option { font-size: 22px; cursor: pointer; padding: 4px; border-radius: 50%; border: 2px solid transparent; }
-        .avatar-option.selected { border-color: var(--accent); background: rgba(255,255,255,0.1); }
-
-        .chat-screen { display: flex; flex-direction: column; height: 100%; }
-
-        .chat-header {
-            padding: 10px 14px;
-            background: var(--input-bg);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .room-tag { font-size: 11px; background: var(--msg-other); padding: 2px 6px; border-radius: 8px; }
-        .online-count { font-size: 11px; color: #10b981; font-weight: bold; }
-
-        .pinned-bar {
-            background: rgba(59, 130, 246, 0.15);
-            border-bottom: 1px solid var(--accent);
-            padding: 6px 12px;
-            font-size: 12px;
-            display: flex;
-            justify-content: space-between;
-            color: var(--accent);
-        }
-
-        .messages-box {
-            flex: 1;
-            padding: 14px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .message {
-            max-width: 85%;
-            padding: 10px 12px;
-            border-radius: 14px;
-            font-size: 13px;
-            line-height: 1.4;
-            word-wrap: break-word;
-            position: relative;
-        }
-
-        .message.me { align-self: flex-start; background: var(--msg-me); color: #fff; border-bottom-right-radius: 2px; }
-        .message.other { align-self: flex-end; background: var(--msg-other); color: var(--text); border-bottom-left-radius: 2px; }
-
-        .mention-highlight { background: #f59e0b; color: #000; padding: 1px 4px; border-radius: 4px; font-weight: bold; }
-
-        /* التصويت (Polls) */
-        .poll-box { background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; margin-top: 6px; }
-        .poll-option { background: var(--card); padding: 6px; margin: 4px 0; border-radius: 6px; cursor: pointer; font-size: 12px; display: flex; justify-content: space-between; }
-
-        .msg-actions {
-            display: flex;
-            gap: 6px;
-            font-size: 10px;
-            margin-top: 5px;
-            opacity: 0.8;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding-top: 4px;
-            flex-wrap: wrap;
-        }
-        .msg-actions span { cursor: pointer; }
-
-        .typing-indicator { font-size: 11px; color: var(--text-muted); padding: 2px 14px; height: 14px; font-style: italic; }
-
-        .chat-input-area {
-            padding: 10px;
-            background: var(--input-bg);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            position: relative;
-        }
-
-        .chat-input-area input { margin-bottom: 0; flex: 1; }
-
-        /* قائمة المنشن */
-        .mention-popup {
-            position: absolute;
-            bottom: 50px;
-            right: 10px;
-            background: var(--card);
-            border: 1px solid var(--text-muted);
-            border-radius: 8px;
-            max-height: 120px;
-            overflow-y: auto;
-            width: 150px;
-            z-index: 10;
-        }
-        .mention-item { padding: 6px 10px; cursor: pointer; font-size: 12px; }
-        .mention-item:hover { background: var(--accent); color: #fff; }
-
-        /* لوحة التحكم للأدمن */
-        .modal {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 100;
-        }
-        .modal-content { background: var(--card); padding: 20px; border-radius: 12px; width: 80%; max-width: 350px; }
-
+        .send-btn { background: var(--accent); border: none; color: #fff; padding: 0 16px; height: 36px; border-radius: 18px; font-weight: bold; cursor: pointer; }
+        
+        .login-screen { position: absolute; inset: 0; background: var(--bg); z-index: 50; display: flex; flex-direction: column; justify-content: center; padding: 20px; gap: 10px; }
+        .login-screen input { width: 100%; margin-bottom: 10px; }
         .hidden { display: none !important; }
     </style>
-
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
 
-    <div class="container">
-        <!-- 1. شاشة الدخول والتسجيل -->
+    <div class="chat-container">
+        <!-- شاشة تسجيل الدخول -->
         <div id="login-screen" class="login-screen">
-            <h2>💬 شات أونلاين الشامل</h2>
-            <p>حدد بروفايلك واشترك في المحادثة</p>
+            <h2 style="text-align:center; margin-bottom:10px;">💬 مرحباً بك في الشات</h2>
+            <input type="text" id="user-input" placeholder="اكتب اسمك...">
+            <input type="text" id="room-input" placeholder="كود الغرفة...">
+            <button class="send-btn" style="width:100%; height:42px;" onclick="initChat()">دخول المحادثة</button>
+        </div>
 
-            <div class="avatar-picker">
-                <span class="avatar-option selected" onclick="selectAvatar('👤', this)">👤</span>
-                <span class="avatar-option" onclick="selectAvatar('🐱', this)">🐱</span>
-                <span class="avatar-option" onclick="selectAvatar('🚀', this)">🚀</span>
-                <span class="avatar-option" onclick="selectAvatar('🎮', this)">🎮</span>
-                <span class="avatar-option" onclick="selectAvatar('🤖', this)">🤖</span>
+        <!-- الهيدر والمعلومات -->
+        <div class="chat-header">
+            <div class="user-info">
+                <div class="avatar">
+                    <span id="avatar-char">U</span>
+                    <div id="online-dot" class="status-dot"></div>
+                </div>
+                <div>
+                    <div id="room-title" style="font-weight:bold; font-size:14px;">غرفة: --</div>
+                    <small id="user-status-txt" style="color:var(--muted); font-size:11px;">غير متصل</small>
+                </div>
             </div>
+            <div class="dev-tag">تطوير: محمد خميس 👑</div>
+        </div>
 
-            <input type="text" id="username" placeholder="اسمك / اللقب">
-            <input type="text" id="room-code" placeholder="اسم أو كود الغرفة">
-            <input type="password" id="room-pass" placeholder="كلمة سر الغرفة (اختياري)">
+        <!-- شريط الرسالة المثبتة -->
+        <div id="pinned-bar" class="pinned-bar hidden">
+            <div>📌 مثبت: <span id="pinned-text">--</span></div>
+            <button onclick="unpinMessage()" style="background:none; border:none; color:var(--muted); cursor:pointer;">✕</button>
+        </div>
+
+        <!-- صندوق المحادثة -->
+        <div id="chat-box" class="chat-box"></div>
+
+        <!-- جاري الكتابة -->
+        <div id="typing-indicator" class="typing-txt"></div>
+
+        <!-- أدوات الإدخال والإرسال -->
+        <div class="input-area">
+            <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFileUpload(event)">
+            <button class="icon-btn" onclick="document.getElementById('file-input').click()">📷</button>
+            <button id="mic-btn" class="icon-btn" onclick="toggleAudioRecord()">🎙️</button>
             
-            <button onclick="enterChat()">دخول الشات</button>
-        </div>
-
-        <!-- 2. شاشة المحادثة -->
-        <div id="chat-screen" class="chat-screen hidden">
-            <div class="chat-header">
-                <div>
-                    <h3 id="display-user">مرحباً</h3>
-                    <span id="display-room" class="room-tag">غرفة: --</span>
-                    <span id="online-count" class="online-count">🟢 0</span>
-                </div>
-                <div>
-                    <button id="admin-btn" onclick="openAdminModal()" class="hidden" style="padding:4px 8px; font-size:11px; background:#f59e0b; color:#000;">⚙️ أدمن</button>
-                    <button onclick="leaveChat()" style="background:#ef4444; font-size:11px; padding:4px 8px;">خروج</button>
-                </div>
-            </div>
-
-            <div id="pinned-bar" class="pinned-bar hidden">
-                <span id="pinned-text">📌 مثبت...</span>
-            </div>
-
-            <div id="messages-box" class="messages-box"></div>
-
-            <div id="typing-txt" class="typing-indicator"></div>
-
-            <!-- قائمة اقتراحات المنشن -->
-            <div id="mention-popup" class="mention-popup hidden"></div>
-
-            <div class="chat-input-area">
-                <button onclick="openPollModal()" title="إنشاء تصويت" style="padding:6px 10px;">📊</button>
-                <input type="text" id="msg-input" placeholder="اكتب رسالتك (@ للتقييد)..." oninput="handleInput()" onkeypress="checkEnter(event)">
-                <button onclick="sendMessage()">إرسال</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- لوحة تحكم الأدمن Modal -->
-    <div id="admin-modal" class="modal hidden">
-        <div class="modal-content">
-            <h4>⚙️ لوحة تحكم الأدمن</h4>
-            <label style="font-size:12px;">اختر وقت الحذف التلقائي للرسائل:</label>
-            <select id="auto-delete-timer" onchange="setDisappearingTimer(this.value)">
-                <option value="off">معطل (لا تحذف)</option>
-                <option value="3600000">بعد ساعة واحدة</option>
-                <option value="86400000">بعد 24 ساعة</option>
-            </select>
-            <br><br>
-            <button onclick="closeModal('admin-modal')" style="width:100%;">إغلاق</button>
-        </div>
-    </div>
-
-    <!-- نافذة إنشاء تصويت Modal -->
-    <div id="poll-modal" class="modal hidden">
-        <div class="modal-content">
-            <h4>📊 إنشاء استطلاع رأي</h4>
-            <input type="text" id="poll-q" placeholder="السؤال...">
-            <input type="text" id="poll-opt1" placeholder="الخيار الأول">
-            <input type="text" id="poll-opt2" placeholder="الخيار الثاني">
-            <button onclick="createPoll()" style="width:100%;">نشر التصويت</button>
-            <button onclick="closeModal('poll-modal')" style="width:100%; background:transparent; color:var(--text); margin-top:5px;">إلغاء</button>
+            <input type="text" id="msg-input" placeholder="اكتب رسالة..." oninput="handleTyping()">
+            <button class="send-btn" onclick="sendTextMessage()">إرسال</button>
         </div>
     </div>
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyBDYK-evC0qZWKJupgCakP2Em4X5yT_Qyc",
-            authDomain: "social-3108b.firebaseapp.com",
-            projectId: "social-3108b",
-            storageBucket: "social-3108b.firebasestorage.app",
-            messagingSenderId: "489846983999",
-            appId: "1:489846983999:web:1e485be0aedb8a665e178a",
-            databaseURL: "https://social-3108b-default-rtdb.firebaseio.com"
+            databaseURL: "https://football-game-2176c-default-rtdb.firebaseio.com"
         };
-
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let currentUser = "";
-        let currentAvatar = "👤";
         let currentRoom = "";
-        let roomAdmin = "";
-        let onlineUsersList = [];
-        let blockedUsers = [];
+        let typingTimeout = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
 
-        function selectAvatar(emoji, el) {
-            currentAvatar = emoji;
-            document.querySelectorAll('.avatar-option').forEach(e => e.classList.remove('selected'));
-            el.classList.add('selected');
+        // تفعيل الإشعارات
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
         }
 
-        function enterChat() {
-            const nameIn = document.getElementById('username').value.trim();
-            const roomIn = document.getElementById('room-code').value.trim();
-            const passIn = document.getElementById('room-pass').value.trim();
+        function initChat() {
+            currentUser = document.getElementById('user-input').value.trim();
+            currentRoom = document.getElementById('room-input').value.trim();
 
-            if (!nameIn || !roomIn) return alert("يرجى إدخال البيانات!");
+            if (!currentUser || !roomIn) {
+                alert("يرجى كتابة الاسم وكود الغرفة!");
+                return;
+            }
 
-            db.ref(`chat_rooms/${roomIn}/settings`).once('value', snapshot => {
-                const settings = snapshot.val() || {};
-                if (settings.password && settings.password !== passIn) return alert("كلمة السر خاطئة!");
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('room-title').innerText = "غرفة: " + currentRoom;
+            document.getElementById('avatar-char').innerText = currentUser.charAt(0).toUpperCase();
 
-                if (!settings.password && passIn) {
-                    db.ref(`chat_rooms/${roomIn}/settings`).set({ password: passIn });
-                }
+            // 1. التواجد وحالة الاتصال
+            const userPresenceRef = db.ref(`chat_rooms/${currentRoom}/users/${currentUser}`);
+            userPresenceRef.set({ online: true, lastSeen: Date.now() });
+            userPresenceRef.onDisconnect().set({ online: false, lastSeen: Date.now() });
 
-                db.ref(`chat_rooms/${roomIn}/admin`).once('value', adminSnap => {
-                    if (!adminSnap.exists()) {
-                        db.ref(`chat_rooms/${roomIn}/admin`).set(nameIn);
-                        roomAdmin = nameIn;
-                    } else {
-                        roomAdmin = adminSnap.val();
-                    }
-
-                    currentUser = nameIn;
-                    currentRoom = roomIn;
-
-                    document.getElementById('display-user').innerText = `${currentAvatar} ${currentUser}`;
-                    document.getElementById('display-room').innerText = "غرفة: " + currentRoom;
-
-                    if (currentUser === roomAdmin) document.getElementById('admin-btn').classList.remove('hidden');
-
-                    document.getElementById('login-screen').classList.add('hidden');
-                    document.getElementById('chat-screen').classList.remove('hidden');
-
-                    setupOnlineStatus();
-                    listenForMessages();
-                    listenForDisappearing();
-                });
-            });
-        }
-
-        function setupOnlineStatus() {
-            const userRef = db.ref(`chat_rooms/${currentRoom}/online/${currentUser}`);
-            userRef.set({ avatar: currentAvatar });
-            userRef.onDisconnect().remove();
-
-            db.ref(`chat_rooms/${currentRoom}/online`).on('value', snapshot => {
+            // الاستماع لحالة المستخدمين الآخرين
+            db.ref(`chat_rooms/${currentRoom}/users`).on('value', snapshot => {
                 const users = snapshot.val() || {};
-                onlineUsersList = Object.keys(users);
-                document.getElementById('online-count').innerText = `🟢 ${onlineUsersList.length}`;
+                let isOtherOnline = false;
+                Object.keys(users).forEach(u => {
+                    if (u !== currentUser && users[u].online) isOtherOnline = true;
+                });
+                
+                const dot = document.getElementById('online-dot');
+                const txt = document.getElementById('user-status-txt');
+                if (isOtherOnline) {
+                    dot.classList.add('online');
+                    txt.innerText = "متصل الآن 🟢";
+                } else {
+                    dot.classList.remove('online');
+                    txt.innerText = "غير متصل 🔴";
+                }
+            });
+
+            // 2. الاستماع للرسائل
+            db.ref(`chat_rooms/${currentRoom}/messages`).on('child_added', snapshot => {
+                const msg = snapshot.val();
+                const msgKey = snapshot.key;
+                renderMessage(msgKey, msg);
+
+                // تم تحديث القراءة (Seen) إذا كانت الرسالة موجهة لي
+                if (msg.sender !== currentUser && !msg.readBy) {
+                    db.ref(`chat_rooms/${currentRoom}/messages/${msgKey}/readBy`).set(true);
+                    playNotificationSound();
+                    showNotification(msg.sender, msg.text || "أرسل مرفقاً صوتاً/صورة");
+                }
+            });
+
+            // الاستماع لتغييرات حالة القراءة (Seen Update)
+            db.ref(`chat_rooms/${currentRoom}/messages`).on('child_changed', snapshot => {
+                const msgKey = snapshot.key;
+                const msg = snapshot.val();
+                const seenElem = document.getElementById(`seen-${msgKey}`);
+                if (seenElem && msg.readBy) {
+                    seenElem.classList.add('read');
+                    seenElem.innerText = "✔✔";
+                }
+            });
+
+            // 3. الاستماع لمؤشر الكتابة
+            db.ref(`chat_rooms/${currentRoom}/typing`).on('value', snapshot => {
+                const typingUser = snapshot.val();
+                const indicator = document.getElementById('typing-indicator');
+                if (typingUser && typingUser !== currentUser) {
+                    indicator.innerText = `✍️ ${typingUser} يكتب الآن...`;
+                } else {
+                    indicator.innerText = "";
+                }
+            });
+
+            // 4. الاستماع للرسالة المثبتة
+            db.ref(`chat_rooms/${currentRoom}/pinned`).on('value', snapshot => {
+                const pinnedText = snapshot.val();
+                const bar = document.getElementById('pinned-bar');
+                if (pinnedText) {
+                    bar.classList.remove('hidden');
+                    document.getElementById('pinned-text').innerText = pinnedText;
+                } else {
+                    bar.classList.add('hidden');
+                }
             });
         }
 
-        function sendMessage() {
+        function sendTextMessage() {
             const input = document.getElementById('msg-input');
             const text = input.value.trim();
             if (!text) return;
 
-            const msgData = {
-                user: currentUser,
-                avatar: currentAvatar,
+            db.ref(`chat_rooms/${currentRoom}/messages`).push({
+                sender: currentUser,
                 text: text,
-                timestamp: Date.now()
-            };
-
-            db.ref(`chat_rooms/${currentRoom}/messages`).push(msgData);
-            input.value = "";
-            document.getElementById('mention-popup').classList.add('hidden');
-        }
-
-        function listenForMessages() {
-            db.ref(`chat_rooms/${currentRoom}/messages`).on('value', snapshot => {
-                const msgs = snapshot.val() || {};
-                renderMessages(msgs);
-            });
-        }
-
-        function renderMessages(messagesObj) {
-            const messagesBox = document.getElementById('messages-box');
-            messagesBox.innerHTML = "";
-
-            Object.keys(messagesObj).forEach(msgId => {
-                const msg = messagesObj[msgId];
-                if (blockedUsers.includes(msg.user)) return; // يتجاهل رسائل المحظورين
-
-                const isMe = msg.user === currentUser;
-                let textHtml = escapeHtml(msg.text);
-
-                // Highlight Mention (@الاسم)
-                if (textHtml.includes(`@${currentUser}`)) {
-                    textHtml = textHtml.replace(new RegExp(`@${currentUser}`, 'g'), `<span class="mention-highlight">@${currentUser}</span>`);
-                }
-
-                // عرض التقرير والتصويت والحظر
-                let actionsHtml = `
-                    <div class="msg-actions">
-                        ${!isMe ? `<span onclick="blockUser('${msg.user}')">🚫 حظر</span>` : ''}
-                        ${!isMe ? `<span onclick="reportMsg('${msgId}')">⚠️ بلاغ</span>` : ''}
-                `;
-
-                if (isMe || currentUser === roomAdmin) {
-                    actionsHtml += `<span onclick="deleteMessage('${msgId}')" style="color:#ef4444;">🗑️ حذف</span>`;
-                }
-                actionsHtml += `</div>`;
-
-                // إذا كانت الرسالة عبارة عن استطلاع رأي (Poll)
-                let pollHtml = "";
-                if (msg.poll) {
-                    pollHtml = `
-                        <div class="poll-box">
-                            <b>📊 ${escapeHtml(msg.poll.question)}</b>
-                            <div class="poll-option" onclick="votePoll('${msgId}', 1)">
-                                <span>1. ${escapeHtml(msg.poll.opt1)}</span> <span>${msg.poll.votes1 || 0}</span>
-                            </div>
-                            <div class="poll-option" onclick="votePoll('${msgId}', 2)">
-                                <span>2. ${escapeHtml(msg.poll.opt2)}</span> <span>${msg.poll.votes2 || 0}</span>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                const msgElement = document.createElement('div');
-                msgElement.className = `message ${isMe ? 'me' : 'other'}`;
-                msgElement.innerHTML = `
-                    <span style="font-size:11px; font-weight:bold;">${msg.avatar || '👤'} ${msg.user}</span>
-                    <div>${textHtml}</div>
-                    ${pollHtml}
-                    ${actionsHtml}
-                `;
-
-                messagesBox.appendChild(msgElement);
+                type: 'text',
+                timestamp: Date.now(),
+                readBy: false
             });
 
-            messagesBox.scrollTop = messagesBox.scrollHeight;
+            input.value = '';
+            clearTyping();
         }
 
-        /* ميزة @Mentions (الإشارة للغير) */
-        function handleInput() {
-            const val = document.getElementById('msg-input').value;
-            const popup = document.getElementById('mention-popup');
+        function renderMessage(key, msg) {
+            const box = document.getElementById('chat-box');
+            const isMe = (msg.sender === currentUser);
+            
+            let contentHTML = '';
+            if (msg.type === 'text') {
+                contentHTML = `<div>${msg.text}</div>`;
+            } else if (msg.type === 'image') {
+                contentHTML = `<img src="${msg.fileUrl}" class="img-msg" />`;
+            } else if (msg.type === 'audio') {
+                contentHTML = `<audio controls src="${msg.fileUrl}"></audio>`;
+            }
 
-            if (val.includes('@')) {
-                const query = val.split('@').pop().toLowerCase();
-                const matches = onlineUsersList.filter(u => u.toLowerCase().startsWith(query) && u !== currentUser);
+            const seenIcon = msg.readBy ? '<span class="seen-status read">✔✔</span>' : '<span class="seen-status">✔</span>';
 
-                if (matches.length > 0) {
-                    popup.innerHTML = matches.map(u => `<div class="mention-item" onclick="applyMention('${u}')">${u}</div>`).join('');
-                    popup.classList.remove('hidden');
-                } else {
-                    popup.classList.add('hidden');
+            const msgHTML = `
+                <div class="msg ${isMe ? 'sent' : 'received'}" id="msg-${key}">
+                    <div style="font-size:10px; font-weight:bold; color:#93c5fd; margin-bottom:2px;">${msg.sender}</div>
+                    ${contentHTML}
+                    <div class="msg-meta">
+                        <span>${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        ${isMe ? `<span id="seen-${key}">${seenIcon}</span>` : ''}
+                        <button onclick="pinMessage('${msg.text || 'مرفق'}')" style="background:none; border:none; cursor:pointer; font-size:10px;">📌</button>
+                    </div>
+                </div>
+            `;
+
+            box.innerHTML += msgHTML;
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // الكتابة وتنبيهها
+        function handleTyping() {
+            db.ref(`chat_rooms/${currentRoom}/typing`).set(currentUser);
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(clearTyping, 2000);
+        }
+
+        function clearTyping() {
+            db.ref(`chat_rooms/${currentRoom}/typing`).set("");
+        }
+
+        // الرسائل الصوتية (Voice Messages)
+        async function toggleAudioRecord() {
+            const micBtn = document.getElementById('mic-btn');
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = () => {
+                            const base64Audio = reader.result;
+                            db.ref(`chat_rooms/${currentRoom}/messages`).push({
+                                sender: currentUser,
+                                fileUrl: base64Audio,
+                                type: 'audio',
+                                timestamp: Date.now(),
+                                readBy: false
+                            });
+                        };
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    micBtn.classList.add('recording');
+                } catch (err) {
+                    alert("يرجى إعطاء صلاحية الميكروفون لاستخدام الصوتيات!");
                 }
             } else {
-                popup.classList.add('hidden');
+                mediaRecorder.stop();
+                isRecording = false;
+                micBtn.classList.remove('recording');
             }
         }
 
-        function applyMention(username) {
-            const input = document.getElementById('msg-input');
-            const parts = input.value.split('@');
-            parts.pop();
-            input.value = parts.join('@') + `@${username} `;
-            document.getElementById('mention-popup').classList.add('hidden');
-            input.focus();
+        // إرسال الصور (Image Upload)
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                db.ref(`chat_rooms/${currentRoom}/messages`).push({
+                    sender: currentUser,
+                    fileUrl: e.target.result,
+                    type: 'image',
+                    timestamp: Date.now(),
+                    readBy: false
+                });
+            };
+            reader.readAsDataURL(file);
         }
 
-        /* ميزة استطلاع الرأي (Polls) */
-        function openPollModal() { document.getElementById('poll-modal').classList.remove('hidden'); }
-        function createPoll() {
-            const q = document.getElementById('poll-q').value.trim();
-            const o1 = document.getElementById('poll-opt1').value.trim();
-            const o2 = document.getElementById('poll-opt2').value.trim();
-
-            if (!q || !o1 || !o2) return alert("املاً جميع الحقول!");
-
-            db.ref(`chat_rooms/${currentRoom}/messages`).push({
-                user: currentUser,
-                avatar: currentAvatar,
-                poll: { question: q, opt1: o1, opt2: o2, votes1: 0, votes2: 0 },
-                timestamp: Date.now()
-            });
-
-            closeModal('poll-modal');
+        // تثبيت الرسائل
+        function pinMessage(text) {
+            db.ref(`chat_rooms/${currentRoom}/pinned`).set(text);
         }
 
-        function votePoll(msgId, option) {
-            const field = option === 1 ? 'votes1' : 'votes2';
-            db.ref(`chat_rooms/${currentRoom}/messages/${msgId}/poll/${field}`).transaction(v => (v || 0) + 1);
+        function unpinMessage() {
+            db.ref(`chat_rooms/${currentRoom}/pinned`).remove();
         }
 
-        /* حظر المستخدم والبلاغات (Moderation) */
-        function blockUser(user) {
-            if (confirm(`هل تريد حظر ${user} وعدم رؤية رسائله؟`)) {
-                blockedUsers.push(user);
-                listenForMessages();
+        // صوت وتنبيه الإشعارات
+        function playNotificationSound() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            osc.connect(ctx.destination);
+            osc.frequency.value = 587.33;
+            osc.start();
+            osc.stop(ctx.currentTime + 0.15);
+        }
+
+        function showNotification(sender, body) {
+            if (Notification.permission === "granted" && document.hidden) {
+                new Notification(`رسالة جديدة من ${sender}`, { body: body });
             }
-        }
-
-        function reportMsg(msgId) {
-            db.ref(`chat_rooms/${currentRoom}/reports`).push({ msgId, reportedBy: currentUser });
-            alert("تم إرسال البلاغ للأدمن!");
-        }
-
-        /* الرسائل المختفية تلقائياً (Disappearing Messages) */
-        function setDisappearingTimer(timeInMs) {
-            db.ref(`chat_rooms/${currentRoom}/settings/disappearingTime`).set(timeInMs);
-        }
-
-        function listenForDisappearing() {
-            db.ref(`chat_rooms/${currentRoom}/settings/disappearingTime`).on('value', snapshot => {
-                const timer = snapshot.val();
-                if (timer && timer !== "off") {
-                    const expiryLimit = Date.now() - parseInt(timer);
-                    db.ref(`chat_rooms/${currentRoom}/messages`).once('value', msgsSnap => {
-                        const msgs = msgsSnap.val() || {};
-                        Object.keys(msgs).forEach(id => {
-                            if (msgs[id].timestamp < expiryLimit) {
-                                db.ref(`chat_rooms/${currentRoom}/messages/${id}`).remove();
-                            }
-                        });
-                    });
-                }
-            });
-        }
-
-        function openAdminModal() { document.getElementById('admin-modal').classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        function deleteMessage(id) { db.ref(`chat_rooms/${currentRoom}/messages/${id}`).remove(); }
-        function checkEnter(e) { if (e.key === 'Enter') sendMessage(); }
-        function escapeHtml(t) { const d = document.createElement('div'); d.innerText = t; return d.innerHTML; }
-
-        function leaveChat() {
-            db.ref(`chat_rooms/${currentRoom}/online/${currentUser}`).remove();
-            location.reload();
         }
     </script>
 </body>
