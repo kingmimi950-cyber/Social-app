@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SquadLink Chat & Status</title>
+    <title>SquadLink Hub & Direct Chat</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -43,12 +43,12 @@
         .header-info { display: flex; align-items: center; gap: 10px; }
         .avatar { width: 38px; height: 38px; background: var(--accent-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; }
 
-        /* Main Content Tabs */
+        /* Navigation Tabs */
         .tab-content { flex: 1; overflow-y: auto; display: none; padding: 15px; }
         .tab-content.active { display: flex; flex-direction: column; gap: 12px; }
 
-        /* Home View */
-        .home-card { background: var(--input-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 10px; }
+        /* Home & Cards */
+        .home-card { background: var(--input-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; }
 
         /* Messages */
         .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; }
@@ -58,21 +58,25 @@
         .msg-sent .msg-bubble { background: var(--msg-sent); color: #fff; }
         .msg-received .msg-bubble { background: var(--msg-received); border: 1px solid var(--border-color); }
         .msg-sender { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
-        .msg-time { font-size: 10px; opacity: 0.7; margin-top: 4px; }
         .chat-img { max-width: 100%; border-radius: 8px; margin-top: 5px; }
-        .file-link { color: var(--accent-color); text-decoration: underline; display: block; margin-top: 5px; }
+
+        /* Members List */
+        .member-item { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); }
+        .member-info { display: flex; align-items: center; gap: 10px; }
+        .online-dot { width: 10px; height: 10px; background: #238636; border-radius: 50%; }
+        .btn-sm { padding: 6px 12px; background: var(--accent-color); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; }
 
         /* Statuses */
-        .status-item { background: var(--input-bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 10px; }
-        .status-author { font-weight: bold; font-size: 13px; color: var(--accent-color); }
+        .status-item { background: var(--input-bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); }
+        .status-img { max-width: 100%; border-radius: 8px; margin-top: 8px; }
 
-        /* Bottom Nav Navigation */
+        /* Bottom Nav */
         .bottom-nav { height: 60px; background: #010409; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; }
-        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
         .nav-btn.active { color: var(--accent-color); font-weight: bold; }
         .nav-btn span { font-size: 18px; }
 
-        /* Input Area */
+        /* Input Bar */
         .input-bar { padding: 10px; background: #010409; border-top: 1px solid var(--border-color); display: flex; gap: 6px; align-items: center; }
         .input-bar input[type="text"] { flex: 1; padding: 10px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 20px; color: #fff; outline: none; }
         .action-icon { background: #21262d; border: 1px solid var(--border-color); color: #fff; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
@@ -89,7 +93,7 @@
         <div id="login-screen" class="login-screen">
             <div class="login-title">SquadLink Hub 🚀</div>
             <input type="text" id="username-input" class="custom-input" placeholder="اسم المستخدم">
-            <input type="text" id="room-input" class="custom-input" placeholder="رمز الغرفة">
+            <input type="text" id="room-input" class="custom-input" placeholder="رمز الغرفة العامة">
             <button class="btn-primary" onclick="saveAndJoin()">دخول التطبيق</button>
         </div>
 
@@ -99,20 +103,21 @@
                 <div class="avatar" id="header-avatar">M</div>
                 <div>
                     <div id="room-name-display" style="font-weight:bold;">غرفة المحادثة</div>
-                    <div style="font-size:11px; color: #238636;">● متصل الان</div>
+                    <div id="chat-subtext" style="font-size:11px; color: #238636;">● متصل الان</div>
                 </div>
             </div>
-            <button onclick="logout()" style="background:none; border:none; color:#ef4444; cursor:pointer;">خروج 🚪</button>
+            <button id="back-to-room-btn" class="btn-sm hidden" onclick="resetToRoomChat()">الرجوع للعامة 🏠</button>
+            <button onclick="logout()" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:13px;">خروج 🚪</button>
         </div>
 
         <!-- 1. Home Tab -->
         <div id="tab-home" class="tab-content hidden">
             <div class="home-card">
                 <h3>أهلاً بك في SquadLink! 👋</h3>
-                <p style="font-size:12px; color:var(--text-muted); margin-top:5px;">منصتك المتكاملة للشات، المشاركة، والحالات.</p>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:5px;">تواصل، ابحث عن أصدقائك، وشارك لحظاتك.</p>
             </div>
             <div class="home-card">
-                <h4>معلومات الغرفة الحالية 🔑</h4>
+                <h4>الغرفة الحالية 🔑</h4>
                 <p id="home-room-id" style="color:var(--accent-color); font-size:18px; margin-top:5px;">-</p>
             </div>
         </div>
@@ -130,20 +135,34 @@
             </div>
         </div>
 
-        <!-- 3. Status Tab -->
+        <!-- 3. Members Tab -->
+        <div id="tab-members" class="tab-content hidden">
+            <input type="text" id="search-member-input" class="custom-input" placeholder="🔍 ابحث عن عضو باسمه..." onkeyup="filterMembers()">
+            <div id="members-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+
+        <!-- 4. Status Tab -->
         <div id="tab-status" class="tab-content hidden">
             <div class="home-card">
                 <h4>إضافة حالة جديدة ⭕</h4>
                 <input type="text" id="status-text" class="custom-input" placeholder="ماذا تفكر الآن؟" style="margin: 10px 0;">
+                
+                <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+                    <label class="btn-sm" for="status-file-input" style="background:var(--input-bg); border:1px solid var(--border-color); flex:1;">📷 إضافة صورة للحالة</label>
+                    <input type="file" id="status-file-input" accept="image/*" class="hidden" onchange="previewStatusImage(event)">
+                    <span id="status-img-name" style="font-size:11px; color:var(--text-muted);"></span>
+                </div>
+                
                 <button class="btn-primary" onclick="postStatus()">نشر الحالة</button>
             </div>
-            <div id="statuses-list"></div>
+            <div id="statuses-list" style="display:flex; flex-direction:column; gap:10px;"></div>
         </div>
 
         <!-- Bottom Navigation Bar -->
         <div id="bottom-nav" class="bottom-nav hidden">
             <button class="nav-btn" onclick="switchTab('home')" id="nav-home"><span>🏠</span>الرئيسية</button>
             <button class="nav-btn active" onclick="switchTab('chat')" id="nav-chat"><span>💬</span>الشات</button>
+            <button class="nav-btn" onclick="switchTab('members')" id="nav-members"><span>👥</span>الأعضاء</button>
             <button class="nav-btn" onclick="switchTab('status')" id="nav-status"><span>⭕</span>الحالات</button>
         </div>
     </div>
@@ -155,6 +174,10 @@
 
         let currentUser = "";
         let currentRoom = "";
+        let currentChatPath = "";
+        let isPrivateChat = false;
+        let selectedStatusImgBase64 = null;
+
         let isRecording = false;
         let mediaRecorder = null;
         let audioChunks = [];
@@ -181,6 +204,7 @@
         function joinRoom(user, room) {
             currentUser = user;
             currentRoom = room;
+            currentChatPath = 'rooms/' + currentRoom + '/messages';
 
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('chat-header').classList.remove('hidden');
@@ -190,8 +214,15 @@
             document.getElementById('home-room-id').innerText = currentRoom;
             document.getElementById('header-avatar').innerText = currentUser.charAt(0).toUpperCase();
 
+            // تسجيل حضور العضو في قائمة الأعضاء
+            db.ref('rooms/' + currentRoom + '/members/' + currentUser).set({
+                name: currentUser, online: true, lastSeen: Date.now()
+            });
+            db.ref('rooms/' + currentRoom + '/members/' + currentUser).onDisconnect().remove();
+
             switchTab('chat');
             listenToMessages();
+            listenToMembers();
             listenToStatuses();
         }
 
@@ -203,9 +234,10 @@
             document.getElementById('nav-' + tabName).classList.add('active');
         }
 
-        /* Chat Logic */
+        /* Chat Logic (Room & Direct Messages) */
         function listenToMessages() {
-            db.ref('rooms/' + currentRoom + '/messages').on('value', (snapshot) => {
+            db.ref(currentChatPath).off(); // إلغاء الاستماع القديم
+            db.ref(currentChatPath).on('value', (snapshot) => {
                 const list = document.getElementById('messages-list');
                 list.innerHTML = "";
                 const data = snapshot.val();
@@ -219,12 +251,120 @@
         function sendMsg() {
             const input = document.getElementById('message-text');
             if (!input.value.trim()) return;
-            db.ref('rooms/' + currentRoom + '/messages').push({
+            db.ref(currentChatPath).push({
                 sender: currentUser, text: input.value.trim(), timestamp: Date.now()
             });
             input.value = "";
         }
 
+        /* Members & Direct Chat Creation */
+        function listenToMembers() {
+            db.ref('rooms/' + currentRoom + '/members').on('value', (snapshot) => {
+                const list = document.getElementById('members-list');
+                list.innerHTML = "";
+                const data = snapshot.val();
+                if (!data) return;
+
+                Object.values(data).forEach(member => {
+                    if (member.name === currentUser) return; // عدم إظهار نفسي في الشات الفردي
+
+                    const item = document.createElement('div');
+                    item.className = "member-item member-node";
+                    item.setAttribute('data-name', member.name.toLowerCase());
+                    item.innerHTML = `
+                        <div class="member-info">
+                            <div class="online-dot"></div>
+                            <span style="font-weight:500;">${member.name}</span>
+                        </div>
+                        <button class="btn-sm" onclick="startPrivateChat('${member.name}')">محادثة خاصة 💬</button>
+                    `;
+                    list.appendChild(item);
+                });
+            });
+        }
+
+        function filterMembers() {
+            const query = document.getElementById('search-member-input').value.toLowerCase();
+            document.querySelectorAll('.member-node').forEach(node => {
+                const name = node.getAttribute('data-name');
+                node.style.display = name.includes(query) ? 'flex' : 'none';
+            });
+        }
+
+        function startPrivateChat(targetUser) {
+            isPrivateChat = true;
+            const privateChatId = [currentUser, targetUser].sort().join('_private_');
+            currentChatPath = 'private_chats/' + privateChatId;
+
+            document.getElementById('room-name-display').innerText = "خاص مع: " + targetUser;
+            document.getElementById('chat-subtext').innerText = "محادثة مشفرة فردية";
+            document.getElementById('back-to-room-btn').classList.remove('hidden');
+
+            switchTab('chat');
+            listenToMessages();
+        }
+
+        function resetToRoomChat() {
+            isPrivateChat = false;
+            currentChatPath = 'rooms/' + currentRoom + '/messages';
+
+            document.getElementById('room-name-display').innerText = "غرفة: " + currentRoom;
+            document.getElementById('chat-subtext').innerText = "● متصل الان";
+            document.getElementById('back-to-room-btn').classList.add('hidden');
+
+            switchTab('chat');
+            listenToMessages();
+        }
+
+        /* Statuses & Images */
+        function previewStatusImage(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 1.5 * 1024 * 1024) return alert("حجم الصورة كبير جداً!");
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                selectedStatusImgBase64 = evt.target.result;
+                document.getElementById('status-img-name').innerText = file.name.substring(0, 15) + "...";
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function postStatus() {
+            const text = document.getElementById('status-text').value.trim();
+            if (!text && !selectedStatusImgBase64) return alert("اكتب نصاً أو اختر صورة لنشر الحالة!");
+
+            db.ref('rooms/' + currentRoom + '/statuses').push({
+                sender: currentUser, text: text || "", image: selectedStatusImgBase64 || null, timestamp: Date.now()
+            });
+
+            document.getElementById('status-text').value = "";
+            document.getElementById('status-file-input').value = "";
+            document.getElementById('status-img-name').innerText = "";
+            selectedStatusImgBase64 = null;
+        }
+
+        function listenToStatuses() {
+            db.ref('rooms/' + currentRoom + '/statuses').on('value', (snapshot) => {
+                const list = document.getElementById('statuses-list');
+                list.innerHTML = "";
+                const data = snapshot.val();
+                if (!data) return;
+
+                Object.values(data).reverse().forEach(s => {
+                    const item = document.createElement('div');
+                    item.className = "status-item";
+                    item.innerHTML = `
+                        <div style="font-weight:bold; color:var(--accent-color); font-size:13px;">${s.sender}</div>
+                        ${s.text ? `<div style="margin-top:4px;">${s.text}</div>` : ''}
+                        ${s.image ? `<img src="${s.image}" class="status-img" />` : ''}
+                    `;
+                    list.appendChild(item);
+                });
+            });
+        }
+
+        /* File Uploads & Recording in Chat */
         function handleFileUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -232,7 +372,7 @@
 
             const reader = new FileReader();
             reader.onload = function(evt) {
-                db.ref('rooms/' + currentRoom + '/messages').push({
+                db.ref(currentChatPath).push({
                     sender: currentUser,
                     fileData: evt.target.result,
                     fileName: file.name,
@@ -254,7 +394,7 @@
                     const blob = new Blob(audioChunks, { type: 'audio/webm' });
                     const r = new FileReader();
                     r.onloadend = () => {
-                        db.ref('rooms/' + currentRoom + '/messages').push({
+                        db.ref(currentChatPath).push({
                             sender: currentUser, audio: r.result, timestamp: Date.now()
                         });
                     };
@@ -283,7 +423,7 @@
                 if (msg.fileType.startsWith('image/')) {
                     content += `<img src="${msg.fileData}" class="chat-img" />`;
                 } else {
-                    content += `<a href="${msg.fileData}" download="${msg.fileName}" class="file-link">📁 ${msg.fileName}</a>`;
+                    content += `<a href="${msg.fileData}" download="${msg.fileName}" style="color:var(--accent-color);">📁 ${msg.fileName}</a>`;
                 }
             }
 
@@ -292,32 +432,6 @@
                 <div class="msg-bubble">${content}</div>
             `;
             list.appendChild(div);
-        }
-
-        /* Statuses Logic */
-        function postStatus() {
-            const text = document.getElementById('status-text').value.trim();
-            if (!text) return;
-            db.ref('rooms/' + currentRoom + '/statuses').push({
-                sender: currentUser, text: text, timestamp: Date.now()
-            });
-            document.getElementById('status-text').value = "";
-        }
-
-        function listenToStatuses() {
-            db.ref('rooms/' + currentRoom + '/statuses').on('value', (snapshot) => {
-                const list = document.getElementById('statuses-list');
-                list.innerHTML = "";
-                const data = snapshot.val();
-                if (!data) return;
-
-                Object.values(data).reverse().forEach(s => {
-                    const item = document.createElement('div');
-                    item.className = "status-item";
-                    item.innerHTML = `<div class="status-author">${s.sender}</div><div>${s.text}</div>`;
-                    list.appendChild(item);
-                });
-            });
         }
 
         function logout() {
