@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SquadLink Hub & Direct Chat</title>
+    <title>SquadLink Pro - Ultimate Max</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -20,8 +20,33 @@
             --border-color: #30363d;
         }
 
+        /* Themes */
+        body.theme-light {
+            --bg-color: #f6f8fa;
+            --card-bg: #ffffff;
+            --input-bg: #f3f4f6;
+            --accent-color: #0969da;
+            --text-color: #24292f;
+            --text-muted: #57606a;
+            --msg-sent: #2da44e;
+            --msg-received: #f3f4f6;
+            --border-color: #d0d7de;
+        }
+
+        body.theme-cyber {
+            --bg-color: #0f051d;
+            --card-bg: #1d0c36;
+            --input-bg: #2d1254;
+            --accent-color: #f706cf;
+            --text-color: #00f0ff;
+            --text-muted: #b57cff;
+            --msg-sent: #8a00c2;
+            --msg-received: #2d1254;
+            --border-color: #f706cf;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); height: 100vh; display: flex; justify-content: center; align-items: center; }
+        body { background-color: var(--bg-color); color: var(--text-color); height: 100vh; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
 
         .app-container {
             width: 100%; max-width: 450px; height: 95vh; background: var(--card-bg);
@@ -32,54 +57,62 @@
         /* Login Screen */
         .login-screen {
             position: absolute; inset: 0; background: var(--card-bg); z-index: 100;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 25px; gap: 15px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 25px; gap: 12px;
         }
         .login-title { font-size: 24px; font-weight: bold; color: var(--accent-color); }
-        .custom-input { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 10px; color: #fff; outline: none; }
+        .custom-input { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-color); outline: none; }
         .btn-primary { width: 100%; padding: 12px; background: var(--accent-color); color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
         /* Header */
-        .chat-header { padding: 12px 16px; background: #010409; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+        .chat-header { padding: 12px 16px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
         .header-info { display: flex; align-items: center; gap: 10px; }
         .avatar { width: 38px; height: 38px; background: var(--accent-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; }
 
-        /* Navigation Tabs */
+        /* Tabs */
         .tab-content { flex: 1; overflow-y: auto; display: none; padding: 15px; }
         .tab-content.active { display: flex; flex-direction: column; gap: 12px; }
 
-        /* Home & Cards */
         .home-card { background: var(--input-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; }
+
+        /* Pinned Message Bar */
+        .pinned-bar { background: rgba(88, 166, 255, 0.15); border-right: 4px solid var(--accent-color); padding: 8px 12px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 6px; }
 
         /* Messages */
         .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; }
         .msg-sent { align-self: flex-start; }
         .msg-received { align-self: flex-end; }
-        .msg-bubble { padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; word-break: break-word; }
+        .msg-bubble { padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; word-break: break-word; position: relative; }
         .msg-sent .msg-bubble { background: var(--msg-sent); color: #fff; }
         .msg-received .msg-bubble { background: var(--msg-received); border: 1px solid var(--border-color); }
         .msg-sender { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
-        .chat-img { max-width: 100%; border-radius: 8px; margin-top: 5px; }
+        .seen-status { font-size: 11px; margin-right: 5px; }
 
-        /* Members List */
+        /* Polls */
+        .poll-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; margin-top: 5px; }
+        .poll-option-btn { width: 100%; text-align: right; padding: 8px; margin-top: 5px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; }
+
+        /* Actions */
+        .action-bar-sm { display: flex; gap: 8px; font-size: 11px; margin-top: 5px; color: var(--text-muted); flex-wrap: wrap; }
+        .action-bar-sm span { cursor: pointer; padding: 2px 4px; border-radius: 4px; }
+        .action-bar-sm span:hover { background: rgba(255,255,255,0.1); color: var(--accent-color); }
+
+        /* Members */
         .member-item { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); }
-        .member-info { display: flex; align-items: center; gap: 10px; }
         .online-dot { width: 10px; height: 10px; background: #238636; border-radius: 50%; }
         .btn-sm { padding: 6px 12px; background: var(--accent-color); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; }
 
-        /* Statuses */
-        .status-item { background: var(--input-bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); }
-        .status-img { max-width: 100%; border-radius: 8px; margin-top: 8px; }
-
         /* Bottom Nav */
-        .bottom-nav { height: 60px; background: #010409; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; }
-        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+        .bottom-nav { height: 60px; background: rgba(0,0,0,0.3); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; }
+        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
         .nav-btn.active { color: var(--accent-color); font-weight: bold; }
-        .nav-btn span { font-size: 18px; }
+        .nav-btn span { font-size: 16px; }
 
         /* Input Bar */
-        .input-bar { padding: 10px; background: #010409; border-top: 1px solid var(--border-color); display: flex; gap: 6px; align-items: center; }
-        .input-bar input[type="text"] { flex: 1; padding: 10px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 20px; color: #fff; outline: none; }
-        .action-icon { background: #21262d; border: 1px solid var(--border-color); color: #fff; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .input-bar { padding: 10px; background: rgba(0,0,0,0.3); border-top: 1px solid var(--border-color); display: flex; gap: 6px; align-items: center; }
+        .input-bar input[type="text"] { flex: 1; padding: 10px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-color); outline: none; }
+        .action-icon { background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+
+        .theme-select { width: 100%; padding: 8px; margin-top: 10px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 8px; }
 
         .hidden { display: none !important; }
     </style>
@@ -91,7 +124,7 @@
     <div class="app-container">
         <!-- Login Screen -->
         <div id="login-screen" class="login-screen">
-            <div class="login-title">SquadLink Hub 🚀</div>
+            <div class="login-title">SquadLink Pro 🚀</div>
             <input type="text" id="username-input" class="custom-input" placeholder="اسم المستخدم">
             <input type="text" id="room-input" class="custom-input" placeholder="رمز الغرفة العامة">
             <button class="btn-primary" onclick="saveAndJoin()">دخول التطبيق</button>
@@ -114,24 +147,48 @@
         <div id="tab-home" class="tab-content hidden">
             <div class="home-card">
                 <h3>أهلاً بك في SquadLink! 👋</h3>
-                <p style="font-size:12px; color:var(--text-muted); margin-top:5px;">تواصل، ابحث عن أصدقائك، وشارك لحظاتك.</p>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:5px;">تخصيص الثيم وإعدادات الحساب</p>
+                <select class="theme-select" onchange="changeTheme(this.value)">
+                    <option value="dark">🎨 الثيم الغامق (افتراضي)</option>
+                    <option value="light">☀️ الثيم الفاتح</option>
+                    <option value="cyber">⚡ ثيم السايبر بنك</option>
+                </select>
             </div>
             <div class="home-card">
-                <h4>الغرفة الحالية 🔑</h4>
-                <p id="home-room-id" style="color:var(--accent-color); font-size:18px; margin-top:5px;">-</p>
+                <h4>قفل المحادثات الخاصة 🔒</h4>
+                <input type="password" id="passcode-input" class="custom-input" placeholder="تعيين رمز سري للشات الخاص" style="margin-top:8px;">
+                <button class="btn-primary" style="margin-top:8px;" onclick="savePasscode()">حفظ الرمز السري</button>
             </div>
         </div>
 
         <!-- 2. Chat Tab -->
         <div id="tab-chat" class="tab-content hidden">
+            <div id="pinned-bar" class="pinned-bar hidden">
+                <div>📌 <strong id="pinned-text">رسالة مثبتة</strong></div>
+                <span style="cursor:pointer;" onclick="unpinMsg()">✕</span>
+            </div>
+
             <div id="messages-list" style="display:flex; flex-direction:column; gap:10px; flex:1;"></div>
             
             <div id="input-bar" class="input-bar">
+                <button class="action-icon" onclick="togglePollModal()">📊</button>
                 <label class="action-icon" for="file-input">📎</label>
                 <input type="file" id="file-input" class="hidden" onchange="handleFileUpload(event)">
                 <button id="mic-btn" class="action-icon" onclick="toggleRecording()">🎤</button>
                 <input type="text" id="message-text" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') sendMsg()">
-                <button class="action-icon" style="background:var(--accent-color)" onclick="sendMsg()">➤</button>
+                <button class="action-icon" style="background:var(--accent-color); color:#fff;" onclick="sendMsg()">➤</button>
+            </div>
+        </div>
+
+        <!-- Create Poll Form Modal -->
+        <div id="poll-modal" class="home-card hidden" style="position:absolute; bottom:70px; left:15px; right:15px; z-index:10; background:var(--card-bg);">
+            <h4>إنشاء استطلاع رأي 📊</h4>
+            <input type="text" id="poll-q" class="custom-input" placeholder="السؤال..." style="margin-top:5px;">
+            <input type="text" id="poll-op1" class="custom-input" placeholder="الخيار الأول" style="margin-top:5px;">
+            <input type="text" id="poll-op2" class="custom-input" placeholder="الخيار الثاني" style="margin-top:5px;">
+            <div style="display:flex; gap:10px; margin-top:8px;">
+                <button class="btn-primary" onclick="createPoll()">نشر</button>
+                <button class="btn-primary" style="background:#ef4444;" onclick="togglePollModal()">إلغاء</button>
             </div>
         </div>
 
@@ -146,16 +203,14 @@
             <div class="home-card">
                 <h4>إضافة حالة جديدة ⭕</h4>
                 <input type="text" id="status-text" class="custom-input" placeholder="ماذا تفكر الآن؟" style="margin: 10px 0;">
-                
-                <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
-                    <label class="btn-sm" for="status-file-input" style="background:var(--input-bg); border:1px solid var(--border-color); flex:1;">📷 إضافة صورة للحالة</label>
-                    <input type="file" id="status-file-input" accept="image/*" class="hidden" onchange="previewStatusImage(event)">
-                    <span id="status-img-name" style="font-size:11px; color:var(--text-muted);"></span>
-                </div>
-                
                 <button class="btn-primary" onclick="postStatus()">نشر الحالة</button>
             </div>
             <div id="statuses-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+
+        <!-- 5. Saved Items Tab -->
+        <div id="tab-saved" class="tab-content hidden">
+            <div id="saved-items-list" style="display:flex; flex-direction:column; gap:10px;"></div>
         </div>
 
         <!-- Bottom Navigation Bar -->
@@ -164,6 +219,7 @@
             <button class="nav-btn active" onclick="switchTab('chat')" id="nav-chat"><span>💬</span>الشات</button>
             <button class="nav-btn" onclick="switchTab('members')" id="nav-members"><span>👥</span>الأعضاء</button>
             <button class="nav-btn" onclick="switchTab('status')" id="nav-status"><span>⭕</span>الحالات</button>
+            <button class="nav-btn" onclick="switchTab('saved')" id="nav-saved"><span>💾</span>المحفوظات</button>
         </div>
     </div>
 
@@ -175,12 +231,7 @@
         let currentUser = "";
         let currentRoom = "";
         let currentChatPath = "";
-        let isPrivateChat = false;
-        let selectedStatusImgBase64 = null;
-
-        let isRecording = false;
-        let mediaRecorder = null;
-        let audioChunks = [];
+        let isRecording = false, mediaRecorder = null, audioChunks = [];
 
         window.addEventListener('DOMContentLoaded', () => {
             const savedUser = localStorage.getItem('squadlink_user');
@@ -211,19 +262,16 @@
             document.getElementById('bottom-nav').classList.remove('hidden');
             
             document.getElementById('room-name-display').innerText = "غرفة: " + currentRoom;
-            document.getElementById('home-room-id').innerText = currentRoom;
             document.getElementById('header-avatar').innerText = currentUser.charAt(0).toUpperCase();
 
-            // تسجيل حضور العضو في قائمة الأعضاء
-            db.ref('rooms/' + currentRoom + '/members/' + currentUser).set({
-                name: currentUser, online: true, lastSeen: Date.now()
-            });
+            db.ref('rooms/' + currentRoom + '/members/' + currentUser).set({ name: currentUser, online: true });
             db.ref('rooms/' + currentRoom + '/members/' + currentUser).onDisconnect().remove();
 
             switchTab('chat');
             listenToMessages();
             listenToMembers();
             listenToStatuses();
+            listenToPinnedMsg();
         }
 
         function switchTab(tabName) {
@@ -232,18 +280,26 @@
 
             document.getElementById('tab-' + tabName).classList.add('active');
             document.getElementById('nav-' + tabName).classList.add('active');
+            if (tabName === 'saved') loadSavedItems();
         }
 
-        /* Chat Logic (Room & Direct Messages) */
+        /* Chat & Seen Receipts */
         function listenToMessages() {
-            db.ref(currentChatPath).off(); // إلغاء الاستماع القديم
+            db.ref(currentChatPath).off();
             db.ref(currentChatPath).on('value', (snapshot) => {
                 const list = document.getElementById('messages-list');
                 list.innerHTML = "";
                 const data = snapshot.val();
                 if (!data) return;
 
-                Object.keys(data).forEach(id => renderMessage(data[id]));
+                Object.keys(data).forEach(id => {
+                    const msg = data[id];
+                    // تحديث قراءة الرسالة (Seen)
+                    if (msg.sender !== currentUser && (!msg.seenBy || !msg.seenBy[currentUser])) {
+                        db.ref(currentChatPath + '/' + id + '/seenBy/' + currentUser).set(true);
+                    }
+                    renderMessage(id, msg);
+                });
                 list.parentElement.scrollTop = list.parentElement.scrollHeight;
             });
         }
@@ -251,97 +307,138 @@
         function sendMsg() {
             const input = document.getElementById('message-text');
             if (!input.value.trim()) return;
-            db.ref(currentChatPath).push({
-                sender: currentUser, text: input.value.trim(), timestamp: Date.now()
-            });
+            db.ref(currentChatPath).push({ sender: currentUser, text: input.value.trim(), timestamp: Date.now() });
             input.value = "";
         }
 
-        /* Members & Direct Chat Creation */
+        /* Pinned Messages */
+        function pinMsg(text) {
+            db.ref('rooms/' + currentRoom + '/pinned').set(text);
+        }
+        function unpinMsg() {
+            db.ref('rooms/' + currentRoom + '/pinned').remove();
+        }
+        function listenToPinnedMsg() {
+            db.ref('rooms/' + currentRoom + '/pinned').on('value', (snapshot) => {
+                const text = snapshot.val();
+                const bar = document.getElementById('pinned-bar');
+                if (text) {
+                    document.getElementById('pinned-text').innerText = text;
+                    bar.classList.remove('hidden');
+                } else {
+                    bar.classList.add('hidden');
+                }
+            });
+        }
+
+        /* Polls */
+        function togglePollModal() { document.getElementById('poll-modal').classList.toggle('hidden'); }
+        function createPoll() {
+            const q = document.getElementById('poll-q').value, op1 = document.getElementById('poll-op1').value, op2 = document.getElementById('poll-op2').value;
+            if (!q || !op1 || !op2) return alert("أكمل بيانات التصويت!");
+            
+            db.ref(currentChatPath).push({
+                sender: currentUser, isPoll: true, question: q,
+                options: { op1: { text: op1, votes: 0 }, op2: { text: op2, votes: 0 } },
+                timestamp: Date.now()
+            });
+            togglePollModal();
+        }
+        function votePoll(msgId, opKey) {
+            db.ref(currentChatPath + '/' + msgId + '/options/' + opKey + '/votes').transaction(v => (v || 0) + 1);
+        }
+
+        function renderMessage(msgId, msg) {
+            const list = document.getElementById('messages-list');
+            const isMe = msg.sender === currentUser;
+            const div = document.createElement('div');
+            div.className = `msg-wrapper ${isMe ? 'msg-sent' : 'msg-received'}`;
+
+            let content = msg.text ? `<div>${msg.text}</div>` : '';
+            
+            // Poll
+            if (msg.isPoll) {
+                content = `
+                    <div class="poll-box">
+                        <strong>📊 ${msg.question}</strong>
+                        <button class="poll-option-btn" onclick="votePoll('${msgId}', 'op1')"><span>${msg.options.op1.text}</span> <span>(${msg.options.op1.votes || 0})</span></button>
+                        <button class="poll-option-btn" onclick="votePoll('${msgId}', 'op2')"><span>${msg.options.op2.text}</span> <span>(${msg.options.op2.votes || 0})</span></button>
+                    </div>
+                `;
+            }
+
+            // Seen check
+            const seenCount = msg.seenBy ? Object.keys(msg.seenBy).length : 0;
+            const seenHTML = isMe ? `<span class="seen-status">${seenCount > 0 ? '✔️✔️' : '✔️'}</span>` : '';
+
+            div.innerHTML = `
+                <div class="msg-sender">${msg.sender} ${seenHTML}</div>
+                <div class="msg-bubble">
+                    ${content}
+                    <div class="action-bar-sm">
+                        <span onclick="pinMsg('${(msg.text || 'استطلاع').replace(/'/g, "\\'")}')">تثبيت 📌</span>
+                        ${isMe ? `<span style="color:#ef4444;" onclick="db.ref('${currentChatPath}/${msgId}').remove()">مسح 🗑️</span>` : ''}
+                    </div>
+                </div>
+            `;
+            list.appendChild(div);
+        }
+
+        /* Private Chat Lock & Themes */
+        function savePasscode() {
+            const code = document.getElementById('passcode-input').value;
+            localStorage.setItem('squadlink_passcode', code);
+            alert("تم حفظ الرمز السري بنجاح!");
+        }
+
+        function startPrivateChat(targetUser) {
+            const savedCode = localStorage.getItem('squadlink_passcode');
+            if (savedCode) {
+                const input = prompt("أدخل الرمز السري للمحادثة الخاصة:");
+                if (input !== savedCode) return alert("رمز سري خاطئ!");
+            }
+
+            const privateChatId = [currentUser, targetUser].sort().join('_private_');
+            currentChatPath = 'private_chats/' + privateChatId;
+            document.getElementById('room-name-display').innerText = "خاص مع: " + targetUser;
+            document.getElementById('back-to-room-btn').classList.remove('hidden');
+            switchTab('chat');
+            listenToMessages();
+        }
+
+        function changeTheme(theme) {
+            document.body.className = theme === 'light' ? 'theme-light' : (theme === 'cyber' ? 'theme-cyber' : '');
+        }
+
+        function resetToRoomChat() {
+            currentChatPath = 'rooms/' + currentRoom + '/messages';
+            document.getElementById('room-name-display').innerText = "غرفة: " + currentRoom;
+            document.getElementById('back-to-room-btn').classList.add('hidden');
+            switchTab('chat');
+            listenToMessages();
+        }
+
         function listenToMembers() {
             db.ref('rooms/' + currentRoom + '/members').on('value', (snapshot) => {
                 const list = document.getElementById('members-list');
                 list.innerHTML = "";
                 const data = snapshot.val();
                 if (!data) return;
-
-                Object.values(data).forEach(member => {
-                    if (member.name === currentUser) return; // عدم إظهار نفسي في الشات الفردي
-
+                Object.values(data).forEach(m => {
+                    if (m.name === currentUser) return;
                     const item = document.createElement('div');
-                    item.className = "member-item member-node";
-                    item.setAttribute('data-name', member.name.toLowerCase());
-                    item.innerHTML = `
-                        <div class="member-info">
-                            <div class="online-dot"></div>
-                            <span style="font-weight:500;">${member.name}</span>
-                        </div>
-                        <button class="btn-sm" onclick="startPrivateChat('${member.name}')">محادثة خاصة 💬</button>
-                    `;
+                    item.className = "member-item";
+                    item.innerHTML = `<span>${m.name}</span><button class="btn-sm" onclick="startPrivateChat('${m.name}')">خاص 🔒</button>`;
                     list.appendChild(item);
                 });
             });
         }
 
-        function filterMembers() {
-            const query = document.getElementById('search-member-input').value.toLowerCase();
-            document.querySelectorAll('.member-node').forEach(node => {
-                const name = node.getAttribute('data-name');
-                node.style.display = name.includes(query) ? 'flex' : 'none';
-            });
-        }
-
-        function startPrivateChat(targetUser) {
-            isPrivateChat = true;
-            const privateChatId = [currentUser, targetUser].sort().join('_private_');
-            currentChatPath = 'private_chats/' + privateChatId;
-
-            document.getElementById('room-name-display').innerText = "خاص مع: " + targetUser;
-            document.getElementById('chat-subtext').innerText = "محادثة مشفرة فردية";
-            document.getElementById('back-to-room-btn').classList.remove('hidden');
-
-            switchTab('chat');
-            listenToMessages();
-        }
-
-        function resetToRoomChat() {
-            isPrivateChat = false;
-            currentChatPath = 'rooms/' + currentRoom + '/messages';
-
-            document.getElementById('room-name-display').innerText = "غرفة: " + currentRoom;
-            document.getElementById('chat-subtext').innerText = "● متصل الان";
-            document.getElementById('back-to-room-btn').classList.add('hidden');
-
-            switchTab('chat');
-            listenToMessages();
-        }
-
-        /* Statuses & Images */
-        function previewStatusImage(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            if (file.size > 1.5 * 1024 * 1024) return alert("حجم الصورة كبير جداً!");
-
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                selectedStatusImgBase64 = evt.target.result;
-                document.getElementById('status-img-name').innerText = file.name.substring(0, 15) + "...";
-            };
-            reader.readAsDataURL(file);
-        }
-
         function postStatus() {
             const text = document.getElementById('status-text').value.trim();
-            if (!text && !selectedStatusImgBase64) return alert("اكتب نصاً أو اختر صورة لنشر الحالة!");
-
-            db.ref('rooms/' + currentRoom + '/statuses').push({
-                sender: currentUser, text: text || "", image: selectedStatusImgBase64 || null, timestamp: Date.now()
-            });
-
+            if (!text) return;
+            db.ref('rooms/' + currentRoom + '/statuses').push({ sender: currentUser, text: text, timestamp: Date.now() });
             document.getElementById('status-text').value = "";
-            document.getElementById('status-file-input').value = "";
-            document.getElementById('status-img-name').innerText = "";
-            selectedStatusImgBase64 = null;
         }
 
         function listenToStatuses() {
@@ -350,94 +447,16 @@
                 list.innerHTML = "";
                 const data = snapshot.val();
                 if (!data) return;
-
                 Object.values(data).reverse().forEach(s => {
                     const item = document.createElement('div');
-                    item.className = "status-item";
-                    item.innerHTML = `
-                        <div style="font-weight:bold; color:var(--accent-color); font-size:13px;">${s.sender}</div>
-                        ${s.text ? `<div style="margin-top:4px;">${s.text}</div>` : ''}
-                        ${s.image ? `<img src="${s.image}" class="status-img" />` : ''}
-                    `;
+                    item.className = "home-card";
+                    item.innerHTML = `<strong>${s.sender}</strong><div>${s.text}</div>`;
                     list.appendChild(item);
                 });
             });
         }
 
-        /* File Uploads & Recording in Chat */
-        function handleFileUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            if (file.size > 1.5 * 1024 * 1024) return alert("الحد الأقصى للملف 1.5 ميجابايت");
-
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                db.ref(currentChatPath).push({
-                    sender: currentUser,
-                    fileData: evt.target.result,
-                    fileName: file.name,
-                    fileType: file.type,
-                    timestamp: Date.now()
-                });
-            };
-            reader.readAsDataURL(file);
-        }
-
-        async function toggleRecording() {
-            const micBtn = document.getElementById('mic-btn');
-            if (!isRecording) {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
-                    const r = new FileReader();
-                    r.onloadend = () => {
-                        db.ref(currentChatPath).push({
-                            sender: currentUser, audio: r.result, timestamp: Date.now()
-                        });
-                    };
-                    r.readAsDataURL(blob);
-                    stream.getTracks().forEach(t => t.stop());
-                };
-                mediaRecorder.start();
-                isRecording = true;
-                micBtn.style.background = "#ef4444";
-            } else {
-                mediaRecorder.stop();
-                isRecording = false;
-                micBtn.style.background = "#21262d";
-            }
-        }
-
-        function renderMessage(msg) {
-            const list = document.getElementById('messages-list');
-            const isMe = msg.sender === currentUser;
-            const div = document.createElement('div');
-            div.className = `msg-wrapper ${isMe ? 'msg-sent' : 'msg-received'}`;
-
-            let content = msg.text ? `<div>${msg.text}</div>` : '';
-            if (msg.audio) content += `<audio controls src="${msg.audio}" style="max-width:100%; height:30px;"></audio>`;
-            if (msg.fileData) {
-                if (msg.fileType.startsWith('image/')) {
-                    content += `<img src="${msg.fileData}" class="chat-img" />`;
-                } else {
-                    content += `<a href="${msg.fileData}" download="${msg.fileName}" style="color:var(--accent-color);">📁 ${msg.fileName}</a>`;
-                }
-            }
-
-            div.innerHTML = `
-                <div class="msg-sender">${msg.sender}</div>
-                <div class="msg-bubble">${content}</div>
-            `;
-            list.appendChild(div);
-        }
-
-        function logout() {
-            localStorage.clear();
-            location.reload();
-        }
+        function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
 </html>
