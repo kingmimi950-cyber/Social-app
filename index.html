@@ -1,598 +1,3298 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SquadLink Pro - Ultimate Max</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <style>
-        :root {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
-            --input-bg: #21262d;
-            --accent-color: #58a6ff;
-            --text-color: #c9d1d9;
-            --text-muted: #8b949e;
-            --msg-sent: #238636;
-            --msg-received: #21262d;
-            --border-color: #30363d;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SquadLink Pro</title>
 
-        /* Themes */
-        body.theme-light {
-            --bg-color: #f6f8fa;
-            --card-bg: #ffffff;
-            --input-bg: #f3f4f6;
-            --accent-color: #0969da;
-            --text-color: #24292f;
-            --text-muted: #57606a;
-            --msg-sent: #2da44e;
-            --msg-received: #f3f4f6;
-            --border-color: #d0d7de;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 
-        body.theme-cyber {
-            --bg-color: #0f051d;
-            --card-bg: #1d0c36;
-            --input-bg: #2d1254;
-            --accent-color: #f706cf;
-            --text-color: #00f0ff;
-            --text-muted: #b57cff;
-            --msg-sent: #8a00c2;
-            --msg-received: #2d1254;
-            --border-color: #f706cf;
-        }
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); height: 100vh; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
+<style>
+:root{
+    --bg:#0d1117;
+    --card:#161b22;
+    --input:#21262d;
+    --accent:#58a6ff;
+    --text:#c9d1d9;
+    --muted:#8b949e;
+    --border:#30363d;
+    --sent:#238636;
+    --received:#21262d;
+    --danger:#f85149;
+    --warning:#d29922;
+    --success:#2ea043;
+}
 
-        .app-container {
-            width: 100%; max-width: 450px; height: 95vh; background: var(--card-bg);
-            border-radius: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column;
-            overflow: hidden; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
+body.light{
+    --bg:#f6f8fa;
+    --card:#ffffff;
+    --input:#f3f4f6;
+    --accent:#0969da;
+    --text:#24292f;
+    --muted:#57606a;
+    --border:#d0d7de;
+    --sent:#2da44e;
+    --received:#f3f4f6;
+}
 
-        /* Login Screen */
-        .login-screen {
-            position: absolute; inset: 0; background: var(--card-bg); z-index: 100;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 25px; gap: 12px;
-        }
-        .login-title { font-size: 24px; font-weight: bold; color: var(--accent-color); }
-        .custom-input { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-color); outline: none; }
-        .btn-primary { width: 100%; padding: 12px; background: var(--accent-color); color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+body.cyber{
+    --bg:#0f051d;
+    --card:#1d0c36;
+    --input:#2d1254;
+    --accent:#f706cf;
+    --text:#00f0ff;
+    --muted:#b57cff;
+    --border:#f706cf;
+    --sent:#8a00c2;
+    --received:#2d1254;
+}
 
-        /* Header */
-        .chat-header { padding: 12px 16px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
-        .header-info { display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 38px; height: 38px; background: var(--accent-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; }
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Tajawal,sans-serif;
+}
 
-        /* Tabs */
-        .tab-content { flex: 1; overflow-y: auto; display: none; padding: 15px; }
-        .tab-content.active { display: flex; flex-direction: column; gap: 12px; }
+html,body{
+    width:100%;
+    height:100%;
+}
 
-        .home-card { background: var(--input-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; }
+body{
+    background:var(--bg);
+    color:var(--text);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    transition:.25s;
+}
 
-        /* Pinned Message Bar */
-        .pinned-bar { background: rgba(88, 166, 255, 0.15); border-right: 4px solid var(--accent-color); padding: 8px 12px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 6px; }
+button,input,textarea,select{
+    font:inherit;
+}
 
-        /* Messages */
-        .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; }
-        .msg-sent { align-self: flex-start; }
-        .msg-received { align-self: flex-end; }
-        .msg-bubble { padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.4; word-break: break-word; position: relative; }
-        .msg-sent .msg-bubble { background: var(--msg-sent); color: #fff; }
-        .msg-received .msg-bubble { background: var(--msg-received); border: 1px solid var(--border-color); }
-        .msg-sender { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
-        .seen-status { font-size: 11px; margin-right: 5px; }
-        
-        /* Badges */
-        .user-badge { background: var(--accent-color); color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 8px; font-weight: bold; }
+button{
+    cursor:pointer;
+}
 
-        /* Polls */
-        .poll-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; margin-top: 5px; }
-        .poll-option-btn { width: 100%; text-align: right; padding: 8px; margin-top: 5px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; }
+.hidden{
+    display:none!important;
+}
 
-        /* Actions */
-        .action-bar-sm { display: flex; gap: 8px; font-size: 11px; margin-top: 5px; color: var(--text-muted); flex-wrap: wrap; }
-        .action-bar-sm span { cursor: pointer; padding: 2px 4px; border-radius: 4px; }
-        .action-bar-sm span:hover { background: rgba(255,255,255,0.1); color: var(--accent-color); }
+.app{
+    width:100%;
+    max-width:520px;
+    height:96vh;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    overflow:hidden;
+    position:relative;
+    box-shadow:0 15px 40px rgba(0,0,0,.35);
+    display:flex;
+    flex-direction:column;
+}
 
-        /* Members */
-        .member-item { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); }
-        .online-dot { width: 10px; height: 10px; background: #238636; border-radius: 50%; }
-        .btn-sm { padding: 6px 12px; background: var(--accent-color); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; }
+/* LOGIN */
 
-        /* Bottom Nav */
-        .bottom-nav { height: 60px; background: rgba(0,0,0,0.3); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; }
-        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
-        .nav-btn.active { color: var(--accent-color); font-weight: bold; }
-        .nav-btn span { font-size: 16px; }
+.login{
+    position:absolute;
+    inset:0;
+    z-index:100;
+    background:var(--card);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:25px;
+}
 
-        /* Input Bar */
-        .input-bar { padding: 10px; background: rgba(0,0,0,0.3); border-top: 1px solid var(--border-color); display: flex; gap: 6px; align-items: center; }
-        .input-bar input[type="text"] { flex: 1; padding: 10px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-color); outline: none; }
-        .action-icon { background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.login-box{
+    width:100%;
+    max-width:380px;
+    text-align:center;
+}
 
-        .theme-select { width: 100%; padding: 8px; margin-top: 10px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 8px; }
+.logo{
+    font-size:30px;
+    font-weight:800;
+    color:var(--accent);
+    margin-bottom:8px;
+}
 
-        .hidden { display: none !important; }
-    </style>
+.subtitle{
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:22px;
+}
+
+.input{
+    width:100%;
+    padding:12px 14px;
+    background:var(--input);
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--text);
+    outline:none;
+    margin-top:8px;
+}
+
+.input:focus{
+    border-color:var(--accent);
+}
+
+.primary{
+    width:100%;
+    border:0;
+    background:var(--accent);
+    color:#fff;
+    padding:12px;
+    border-radius:10px;
+    font-weight:700;
+    margin-top:10px;
+}
+
+.primary:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+}
+
+/* HEADER */
+
+.header{
+    height:62px;
+    min-height:62px;
+    padding:10px 14px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--card);
+}
+
+.header-info{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+}
+
+.avatar{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:var(--accent);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    flex-shrink:0;
+}
+
+.header-title{
+    font-weight:800;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.header-sub{
+    font-size:11px;
+    color:var(--success);
+}
+
+.header-actions{
+    display:flex;
+    gap:6px;
+}
+
+.icon-btn{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:var(--input);
+    color:var(--text);
+}
+
+/* TABS */
+
+.content{
+    flex:1;
+    min-height:0;
+    overflow:hidden;
+}
+
+.tab{
+    height:100%;
+    overflow-y:auto;
+    padding:14px;
+    display:none;
+}
+
+.tab.active{
+    display:block;
+}
+
+.card{
+    background:var(--input);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:12px;
+}
+
+.card h3,
+.card h4{
+    margin-bottom:7px;
+}
+
+.muted{
+    color:var(--muted);
+    font-size:12px;
+}
+
+/* CHAT */
+
+.pinned{
+    background:rgba(88,166,255,.13);
+    border-right:4px solid var(--accent);
+    border-radius:8px;
+    padding:9px 11px;
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    font-size:12px;
+}
+
+.messages{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+    padding-bottom:8px;
+}
+
+.message{
+    max-width:86%;
+    display:flex;
+    flex-direction:column;
+}
+
+.message.me{
+    align-self:flex-start;
+}
+
+.message.other{
+    align-self:flex-end;
+}
+
+.sender{
+    font-size:10px;
+    color:var(--muted);
+    margin-bottom:3px;
+    display:flex;
+    gap:5px;
+    align-items:center;
+}
+
+.badge{
+    background:var(--accent);
+    color:#fff;
+    padding:2px 6px;
+    border-radius:8px;
+    font-size:9px;
+    font-weight:700;
+}
+
+.bubble{
+    padding:10px 13px;
+    border-radius:14px;
+    line-height:1.5;
+    word-break:break-word;
+    font-size:14px;
+}
+
+.me .bubble{
+    background:var(--sent);
+    color:#fff;
+    border-bottom-left-radius:4px;
+}
+
+.other .bubble{
+    background:var(--received);
+    border:1px solid var(--border);
+    border-bottom-right-radius:4px;
+}
+
+.msg-time{
+    font-size:9px;
+    opacity:.65;
+    margin-top:4px;
+}
+
+.actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    margin-top:5px;
+}
+
+.actions button{
+    background:transparent;
+    border:0;
+    color:var(--muted);
+    font-size:10px;
+    padding:2px 4px;
+}
+
+.actions button:hover{
+    color:var(--accent);
+}
+
+.composer{
+    border-top:1px solid var(--border);
+    background:var(--card);
+    padding:8px;
+    display:flex;
+    gap:6px;
+    align-items:center;
+}
+
+.composer input{
+    flex:1;
+    min-width:0;
+    border-radius:20px;
+    padding:10px 13px;
+    background:var(--input);
+    color:var(--text);
+    border:1px solid var(--border);
+    outline:none;
+}
+
+.send{
+    background:var(--accent);
+    color:#fff;
+    border:0;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+}
+
+/* POLL */
+
+.poll{
+    margin-top:4px;
+}
+
+.poll-option{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    padding:9px;
+    margin-top:6px;
+    background:var(--input);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:8px;
+}
+
+/* MEMBERS */
+
+.member{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:11px;
+    background:var(--input);
+    border:1px solid var(--border);
+    border-radius:10px;
+    margin-top:8px;
+}
+
+.member-info{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.online{
+    width:9px;
+    height:9px;
+    background:var(--success);
+    border-radius:50%;
+}
+
+.small-btn{
+    border:0;
+    background:var(--accent);
+    color:#fff;
+    padding:6px 10px;
+    border-radius:7px;
+    font-size:11px;
+}
+
+/* STATUS */
+
+.status{
+    padding:12px;
+    background:var(--input);
+    border:1px solid var(--border);
+    border-radius:10px;
+}
+
+.status + .status{
+    margin-top:8px;
+}
+
+/* NAV */
+
+.nav{
+    height:62px;
+    min-height:62px;
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    border-top:1px solid var(--border);
+    background:var(--card);
+}
+
+.nav button{
+    flex:1;
+    height:100%;
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    font-size:10px;
+}
+
+.nav button span{
+    display:block;
+    font-size:18px;
+    margin-bottom:2px;
+}
+
+.nav button.active{
+    color:var(--accent);
+    font-weight:800;
+}
+
+/* MODAL */
+
+.modal-bg{
+    position:absolute;
+    inset:0;
+    z-index:50;
+    background:rgba(0,0,0,.65);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.modal{
+    width:100%;
+    max-width:390px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px;
+}
+
+.modal-actions{
+    display:flex;
+    gap:8px;
+}
+
+.modal-actions button{
+    flex:1;
+}
+
+/* SAVED */
+
+.saved-item{
+    background:var(--input);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:8px;
+}
+
+/* TOAST */
+
+.toast{
+    position:absolute;
+    left:15px;
+    right:15px;
+    bottom:75px;
+    z-index:200;
+    background:#161b22;
+    color:#fff;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px;
+    text-align:center;
+    font-size:12px;
+    display:none;
+}
+
+.toast.show{
+    display:block;
+}
+
+/* MAINTENANCE */
+
+.block-screen{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    background:#0d1117;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:25px;
+}
+
+.block-screen h1{
+    color:var(--accent);
+    margin-bottom:10px;
+}
+
+audio{
+    max-width:100%;
+}
+
+/* MOBILE */
+
+@media(max-width:600px){
+    body{
+        align-items:stretch;
+    }
+
+    .app{
+        max-width:none;
+        height:100vh;
+        border-radius:0;
+        border:0;
+    }
+}
+</style>
 </head>
+
 <body>
 
-    <audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+<div id="maintenance-screen" class="block-screen hidden">
+    <div>
+        <h1>🛠️ التطبيق تحت الصيانة</h1>
+        <p style="color:#8b949e">
+            نعمل حالياً على تحسين SquadLink.<br>
+            حاول الدخول مرة أخرى لاحقاً.
+        </p>
+    </div>
+</div>
 
-    <div class="app-container">
-        <!-- Login Screen -->
-        <div id="login-screen" class="login-screen">
-            <div class="login-title">SquadLink Pro 🚀</div>
-            <input type="text" id="username-input" class="custom-input" placeholder="اسم المستخدم">
-            <input type="text" id="room-input" class="custom-input" placeholder="رمز الغرفة العامة">
-            <button class="btn-primary" onclick="saveAndJoin()">دخول التطبيق</button>
+<div class="app">
+
+<!-- LOGIN -->
+
+<div id="login" class="login">
+
+    <div class="login-box">
+
+        <div class="logo">SquadLink 🚀</div>
+
+        <div class="subtitle">
+            منصة تواصل اجتماعي سريعة وبسيطة
         </div>
 
-        <!-- Header -->
-        <div id="chat-header" class="chat-header hidden">
-            <div class="header-info">
-                <div class="avatar" id="header-avatar">M</div>
-                <div>
-                    <div id="room-name-display" style="font-weight:bold;">غرفة المحادثة</div>
-                    <div id="chat-subtext" style="font-size:11px; color: #238636;">● متصل الان</div>
-                </div>
-            </div>
-            <button id="back-to-room-btn" class="btn-sm hidden" onclick="resetToRoomChat()">الرجوع للعامة 🏠</button>
-            <button onclick="logout()" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:13px;">خروج 🚪</button>
-        </div>
+        <input
+            id="username"
+            class="input"
+            type="text"
+            maxlength="30"
+            placeholder="اسم المستخدم"
+        >
 
-        <!-- 1. Home Tab -->
-        <div id="tab-home" class="tab-content hidden">
-            <div class="home-card">
-                <h3>أهلاً بك في SquadLink! 👋</h3>
-                <p style="font-size:12px; color:var(--text-muted); margin-top:5px;">تخصيص الثيم وإعدادات الحساب</p>
-                <select class="theme-select" onchange="changeTheme(this.value)">
-                    <option value="dark">🎨 الثيم الغامق (افتراضي)</option>
-                    <option value="light">☀️ الثيم الفاتح</option>
-                    <option value="cyber">⚡ ثيم السايبر بنك</option>
-                </select>
-            </div>
-            <div class="home-card">
-                <h4>قفل المحادثات الخاصة 🔒</h4>
-                <input type="password" id="passcode-input" class="custom-input" placeholder="تعيين رمز سري للشات الخاص" style="margin-top:8px;">
-                <button class="btn-primary" style="margin-top:8px;" onclick="savePasscode()">حفظ الرمز السري</button>
-            </div>
-            <div class="home-card">
-                <h4>الدعم الفني والخدمات 🛠️</h4>
-                <textarea id="support-ticket-text" class="custom-input" placeholder="اكتب استفسارك أو مشكلتك هنا..." style="margin-top:8px; height:70px; resize:none;"></textarea>
-                <button class="btn-primary" style="margin-top:8px;" onclick="sendSupportTicket()">إرسال تذكرة دعم</button>
-            </div>
-        </div>
+        <input
+            id="room"
+            class="input"
+            type="text"
+            maxlength="30"
+            placeholder="رمز الغرفة"
+        >
 
-        <!-- 2. Chat Tab -->
-        <div id="tab-chat" class="tab-content hidden">
-            <div id="pinned-bar" class="pinned-bar hidden">
-                <div>📌 <strong id="pinned-text">رسالة مثبتة</strong></div>
-                <span style="cursor:pointer;" onclick="unpinMsg()">✕</span>
-            </div>
+        <button class="primary" onclick="login()">
+            دخول التطبيق
+        </button>
 
-            <div id="messages-list" style="display:flex; flex-direction:column; gap:10px; flex:1;"></div>
-            
-            <div id="input-bar" class="input-bar">
-                <button class="action-icon" onclick="togglePollModal()">📊</button>
-                <label class="action-icon" for="file-input">📎</label>
-                <input type="file" id="file-input" class="hidden" onchange="handleFileUpload(event)">
-                <button id="mic-btn" class="action-icon" onclick="toggleRecording()">🎤</button>
-                <input type="text" id="message-text" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') sendMsg()">
-                <button id="send-msg-btn" class="action-icon" style="background:var(--accent-color); color:#fff;" onclick="sendMsg()">➤</button>
-            </div>
-        </div>
+        <p class="muted" style="margin-top:12px">
+            لا تستخدم رموزاً مثل . # $ [ ] / في الاسم أو الغرفة
+        </p>
 
-        <!-- Create Poll Form Modal -->
-        <div id="poll-modal" class="home-card hidden" style="position:absolute; bottom:70px; left:15px; right:15px; z-index:10; background:var(--card-bg);">
-            <h4>إنشاء استطلاع رأي 📊</h4>
-            <input type="text" id="poll-q" class="custom-input" placeholder="السؤال..." style="margin-top:5px;">
-            <input type="text" id="poll-op1" class="custom-input" placeholder="الخيار الأول" style="margin-top:5px;">
-            <input type="text" id="poll-op2" class="custom-input" placeholder="الخيار الثاني" style="margin-top:5px;">
-            <div style="display:flex; gap:10px; margin-top:8px;">
-                <button class="btn-primary" onclick="createPoll()">نشر</button>
-                <button class="btn-primary" style="background:#ef4444;" onclick="togglePollModal()">إلغاء</button>
-            </div>
-        </div>
-
-        <!-- 3. Members Tab -->
-        <div id="tab-members" class="tab-content hidden">
-            <input type="text" id="search-member-input" class="custom-input" placeholder="🔍 ابحث عن عضو باسمه..." onkeyup="filterMembers()">
-            <div id="members-list" style="display:flex; flex-direction:column; gap:8px;"></div>
-        </div>
-
-        <!-- 4. Status Tab -->
-        <div id="tab-status" class="tab-content hidden">
-            <div class="home-card">
-                <h4>إضافة حالة جديدة ⭕</h4>
-                <input type="text" id="status-text" class="custom-input" placeholder="ماذا تفكر الآن؟" style="margin: 10px 0;">
-                <button class="btn-primary" onclick="postStatus()">نشر الحالة</button>
-            </div>
-            <div id="statuses-list" style="display:flex; flex-direction:column; gap:10px;"></div>
-        </div>
-
-        <!-- 5. Saved Items Tab -->
-        <div id="tab-saved" class="tab-content hidden">
-            <div id="saved-items-list" style="display:flex; flex-direction:column; gap:10px;"></div>
-        </div>
-
-        <!-- Bottom Navigation Bar -->
-        <div id="bottom-nav" class="bottom-nav hidden">
-            <button class="nav-btn" onclick="switchTab('home')" id="nav-home"><span>🏠</span>الرئيسية</button>
-            <button class="nav-btn active" onclick="switchTab('chat')" id="nav-chat"><span>💬</span>الشات</button>
-            <button class="nav-btn" onclick="switchTab('members')" id="nav-members"><span>👥</span>الأعضاء</button>
-            <button class="nav-btn" onclick="switchTab('status')" id="nav-status"><span>⭕</span>الحالات</button>
-            <button class="nav-btn" onclick="switchTab('saved')" id="nav-saved"><span>💾</span>المحفوظات</button>
-        </div>
     </div>
 
-    <script>
-        const firebaseConfig = { databaseURL: "https://football-game-2176c-default-rtdb.firebaseio.com" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+</div>
 
-        let currentUser = "";
-        let currentRoom = "";
-        let currentChatPath = "";
-        let isRecording = false, mediaRecorder = null, audioChunks = [];
-        let badWordsList = [];
-        let usersBadges = {};
+<!-- HEADER -->
 
-        window.addEventListener('DOMContentLoaded', () => {
-            listenToAdminSettings();
-            listenToUserBadges();
-            
-            const savedUser = localStorage.getItem('squadlink_user');
-            const savedRoom = localStorage.getItem('squadlink_room');
-            if (savedUser && savedRoom) {
-                document.getElementById('username-input').value = savedUser;
-                document.getElementById('room-input').value = savedRoom;
-                joinRoom(savedUser, savedRoom);
+<header id="header" class="header hidden">
+
+    <div class="header-info">
+
+        <div id="avatar" class="avatar">S</div>
+
+        <div style="min-width:0">
+
+            <div id="header-title" class="header-title">
+                SquadLink
+            </div>
+
+            <div id="header-sub" class="header-sub">
+                ● متصل
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="header-actions">
+
+        <button
+            id="back-room"
+            class="icon-btn hidden"
+            onclick="goPublicChat()"
+            title="العودة للغرفة"
+        >
+            🏠
+        </button>
+
+        <button
+            class="icon-btn"
+            onclick="logout()"
+            title="خروج"
+        >
+            🚪
+        </button>
+
+    </div>
+
+</header>
+
+<!-- CONTENT -->
+
+<div id="content" class="content hidden">
+
+<!-- HOME -->
+
+<section id="tab-home" class="tab">
+
+    <div class="card">
+
+        <h3>👋 أهلاً بك في SquadLink</h3>
+
+        <p class="muted">
+            أهلاً <b id="home-user"></b>
+        </p>
+
+        <select
+            id="theme-select"
+            class="input"
+            onchange="changeTheme(this.value)"
+        >
+            <option value="dark">🌙 الثيم الغامق</option>
+            <option value="light">☀️ الثيم الفاتح</option>
+            <option value="cyber">⚡ Cyber</option>
+        </select>
+
+    </div>
+
+    <div class="card">
+
+        <h4>🔒 قفل المحادثات الخاصة</h4>
+
+        <p class="muted">
+            يمكنك وضع رمز سري قبل فتح المحادثات الخاصة.
+        </p>
+
+        <input
+            id="passcode"
+            class="input"
+            type="password"
+            maxlength="20"
+            placeholder="الرمز السري"
+        >
+
+        <button
+            class="primary"
+            onclick="savePasscode()"
+        >
+            حفظ الرمز
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <h4>🛠️ الدعم الفني</h4>
+
+        <textarea
+            id="support-text"
+            class="input"
+            rows="4"
+            maxlength="1000"
+            placeholder="اكتب مشكلتك أو استفسارك..."
+        ></textarea>
+
+        <button
+            class="primary"
+            onclick="sendSupportTicket()"
+        >
+            إرسال التذكرة
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- CHAT -->
+
+<section id="tab-chat" class="tab">
+
+    <div
+        id="pinned"
+        class="pinned hidden"
+    >
+        <div>
+            📌
+            <b id="pinned-text"></b>
+        </div>
+
+        <button
+            id="remove-pin"
+            style="background:none;border:0;color:var(--danger)"
+            onclick="removeOwnPin()"
+        >
+            ✕
+        </button>
+
+    </div>
+
+    <div id="messages" class="messages"></div>
+
+</section>
+
+
+<!-- MEMBERS -->
+
+<section id="tab-members" class="tab">
+
+    <input
+        id="member-search"
+        class="input"
+        placeholder="🔍 ابحث عن عضو..."
+        oninput="filterMembers()"
+    >
+
+    <div id="members"></div>
+
+</section>
+
+
+<!-- STATUS -->
+
+<section id="tab-status" class="tab">
+
+    <div class="card">
+
+        <h4>⭕ إضافة حالة</h4>
+
+        <textarea
+            id="status-text"
+            class="input"
+            rows="3"
+            maxlength="500"
+            placeholder="ماذا تفكر الآن؟"
+        ></textarea>
+
+        <button
+            class="primary"
+            onclick="postStatus()"
+        >
+            نشر الحالة
+        </button>
+
+    </div>
+
+    <div id="statuses"></div>
+
+</section>
+
+
+<!-- SAVED -->
+
+<section id="tab-saved" class="tab">
+
+    <div class="card">
+
+        <h3>💾 المحفوظات</h3>
+
+        <p class="muted">
+            الرسائل التي حفظتها ستظهر هنا.
+        </p>
+
+    </div>
+
+    <div id="saved"></div>
+
+</section>
+
+</div>
+
+
+<!-- COMPOSER -->
+
+<div id="composer" class="composer hidden">
+
+    <button
+        id="poll-btn"
+        class="icon-btn"
+        onclick="openPoll()"
+        title="استطلاع"
+    >
+        📊
+    </button>
+
+    <button
+        class="icon-btn"
+        onclick="document.getElementById('file-input').click()"
+        title="صورة"
+    >
+        📎
+    </button>
+
+    <input
+        id="file-input"
+        type="file"
+        class="hidden"
+        accept="image/*"
+        onchange="handleFile(event)"
+    >
+
+    <button
+        id="mic-btn"
+        class="icon-btn"
+        onclick="toggleRecording()"
+        title="تسجيل صوت"
+    >
+        🎤
+    </button>
+
+    <input
+        id="message"
+        type="text"
+        maxlength="2000"
+        placeholder="اكتب رسالتك..."
+        autocomplete="off"
+    >
+
+    <button
+        id="send"
+        class="send"
+        onclick="sendMessage()"
+    >
+        ➤
+    </button>
+
+</div>
+
+
+<!-- NAV -->
+
+<nav id="nav" class="nav hidden">
+
+    <button onclick="switchTab('home')" id="nav-home">
+        <span>🏠</span>
+        الرئيسية
+    </button>
+
+    <button onclick="switchTab('chat')" id="nav-chat" class="active">
+        <span>💬</span>
+        الشات
+    </button>
+
+    <button onclick="switchTab('members')" id="nav-members">
+        <span>👥</span>
+        الأعضاء
+    </button>
+
+    <button onclick="switchTab('status')" id="nav-status">
+        <span>⭕</span>
+        الحالات
+    </button>
+
+    <button onclick="switchTab('saved')" id="nav-saved">
+        <span>💾</span>
+        المحفوظات
+    </button>
+
+</nav>
+
+
+<!-- POLL MODAL -->
+
+<div id="poll-modal" class="modal-bg hidden">
+
+    <div class="modal">
+
+        <h3>📊 إنشاء استطلاع</h3>
+
+        <input
+            id="poll-question"
+            class="input"
+            maxlength="200"
+            placeholder="السؤال"
+        >
+
+        <input
+            id="poll-op1"
+            class="input"
+            maxlength="100"
+            placeholder="الخيار الأول"
+        >
+
+        <input
+            id="poll-op2"
+            class="input"
+            maxlength="100"
+            placeholder="الخيار الثاني"
+        >
+
+        <div class="modal-actions">
+
+            <button
+                class="primary"
+                onclick="createPoll()"
+            >
+                نشر
+            </button>
+
+            <button
+                class="primary"
+                style="background:var(--danger)"
+                onclick="closePoll()"
+            >
+                إلغاء
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- TOAST -->
+
+<div id="toast" class="toast"></div>
+
+</div>
+
+
+<audio
+    id="notification-sound"
+    preload="auto"
+    src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
+></audio>
+
+
+<script>
+
+/* =========================================================
+   FIREBASE
+========================================================= */
+
+const firebaseConfig = {
+    databaseURL:"https://football-game-2176c-default-rtdb.firebaseio.com"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.database();
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let currentUser = "";
+let currentRoom = "";
+let currentChatPath = "";
+
+let currentTab = "chat";
+
+let settings = {};
+
+let users = {};
+let badges = {};
+
+let badWords = [];
+
+let members = {};
+
+let recording = false;
+let mediaRecorder = null;
+let audioChunks = [];
+
+let messageListener = null;
+let memberListener = null;
+let statusListener = null;
+let pinnedListener = null;
+
+let lastMessageCount = 0;
+
+let isMuted = false;
+let muteUntil = 0;
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function $(id){
+    return document.getElementById(id);
+}
+
+function showToast(text){
+
+    const toast = $("toast");
+
+    toast.textContent = text;
+    toast.classList.add("show");
+
+    clearTimeout(window.toastTimer);
+
+    window.toastTimer = setTimeout(()=>{
+        toast.classList.remove("show");
+    },3000);
+}
+
+
+function escapeHTML(value){
+
+    const div = document.createElement("div");
+
+    div.textContent = value == null ? "" : String(value);
+
+    return div.innerHTML;
+}
+
+
+function validFirebaseKey(value){
+
+    return value &&
+        !/[.#$[\]\/]/.test(value) &&
+        value.length <= 40;
+}
+
+
+function filterText(text){
+
+    let result = String(text || "");
+
+    badWords.forEach(word=>{
+
+        if(!word) return;
+
+        try{
+
+            const escaped = word.replace(
+                /[.*+?^${}()|[\]\\]/g,
+                "\\$&"
+            );
+
+            result = result.replace(
+                new RegExp(escaped,"gi"),
+                "•••"
+            );
+
+        }catch(e){}
+
+    });
+
+    return result;
+}
+
+
+function formatTime(timestamp){
+
+    if(!timestamp) return "";
+
+    return new Date(timestamp).toLocaleTimeString(
+        "ar-EG",
+        {
+            hour:"2-digit",
+            minute:"2-digit"
+        }
+    );
+}
+
+
+function getSaved(){
+
+    try{
+
+        return JSON.parse(
+            localStorage.getItem("squadlink_saved") || "[]"
+        );
+
+    }catch(e){
+
+        return [];
+
+    }
+}
+
+
+function setSaved(items){
+
+    localStorage.setItem(
+        "squadlink_saved",
+        JSON.stringify(items)
+    );
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+window.addEventListener("DOMContentLoaded",()=>{
+
+    loadTheme();
+
+    listenSettings();
+    listenBadWords();
+    listenUsers();
+
+    const savedUser =
+        localStorage.getItem("squadlink_user");
+
+    const savedRoom =
+        localStorage.getItem("squadlink_room");
+
+    if(savedUser && savedRoom){
+
+        $("username").value = savedUser;
+        $("room").value = savedRoom;
+
+        joinRoom(savedUser,savedRoom);
+
+    }
+
+});
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+function listenSettings(){
+
+    db.ref("settings").on("value",snapshot=>{
+
+        settings = snapshot.val() || {};
+
+        applySettings();
+
+    });
+
+}
+
+
+function applySettings(){
+
+    /* maintenance */
+
+    if(settings.maintenance === true){
+
+        $("maintenance-screen")
+            .classList.remove("hidden");
+
+    }else{
+
+        $("maintenance-screen")
+            .classList.add("hidden");
+
+    }
+
+
+    /* theme */
+
+    if(settings.app_theme_color){
+
+        document.documentElement
+            .style
+            .setProperty(
+                "--accent",
+                settings.app_theme_color
+            );
+
+    }
+
+
+    /* pinned */
+
+    if(settings.pinned_message){
+
+        $("pinned-text").textContent =
+            settings.pinned_message;
+
+        $("pinned").classList.remove("hidden");
+
+    }else{
+
+        $("pinned").classList.add("hidden");
+
+    }
+
+
+    /* freeze */
+
+    updateComposerState();
+
+}
+
+
+/* =========================================================
+   BAD WORDS
+========================================================= */
+
+function listenBadWords(){
+
+    db.ref("settings/bad_words").on(
+        "value",
+        snapshot=>{
+
+            const data = snapshot.val() || {};
+
+            badWords = Object.keys(data);
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   USERS / BADGES
+========================================================= */
+
+function listenUsers(){
+
+    db.ref("users").on(
+        "value",
+        snapshot=>{
+
+            users = snapshot.val() || {};
+
+            badges = {};
+
+            Object.keys(users).forEach(uid=>{
+
+                if(users[uid] && users[uid].badge){
+
+                    badges[uid] =
+                        users[uid].badge;
+
+                }
+
+            });
+
+            renderMembers();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+function login(){
+
+    const user =
+        $("username").value.trim();
+
+    const room =
+        $("room").value.trim();
+
+    if(!user || !room){
+
+        showToast("اكتب اسم المستخدم والغرفة أولاً");
+        return;
+
+    }
+
+
+    if(!validFirebaseKey(user)){
+
+        showToast(
+            "اسم المستخدم يحتوي على رموز غير مسموحة"
+        );
+
+        return;
+
+    }
+
+
+    if(!validFirebaseKey(room)){
+
+        showToast(
+            "رمز الغرفة يحتوي على رموز غير مسموحة"
+        );
+
+        return;
+
+    }
+
+
+    localStorage.setItem(
+        "squadlink_user",
+        user
+    );
+
+    localStorage.setItem(
+        "squadlink_room",
+        room
+    );
+
+
+    joinRoom(user,room);
+
+}
+
+
+function joinRoom(user,room){
+
+    currentUser = user;
+    currentRoom = room;
+
+    currentChatPath =
+        "rooms/" +
+        currentRoom +
+        "/messages";
+
+
+    $("login").classList.add("hidden");
+    $("header").classList.remove("hidden");
+    $("content").classList.remove("hidden");
+    $("composer").classList.remove("hidden");
+    $("nav").classList.remove("hidden");
+
+
+    $("avatar").textContent =
+        currentUser.charAt(0).toUpperCase();
+
+
+    $("home-user").textContent =
+        currentUser;
+
+
+    $("header-title").textContent =
+        "غرفة: " + currentRoom;
+
+
+    updateOnlineStatus();
+
+    checkBan();
+
+    checkMute();
+
+    listenMessages();
+
+    listenMembers();
+
+    listenStatuses();
+
+    listenPinned();
+
+    switchTab("chat");
+
+}
+
+
+/* =========================================================
+   ONLINE
+========================================================= */
+
+function updateOnlineStatus(){
+
+    const userRef =
+        db.ref("users/" + currentUser);
+
+    userRef.update({
+
+        username:currentUser,
+        lastSeen:firebase.database.ServerValue.TIMESTAMP
+
+    });
+
+
+    const memberRef =
+        db.ref(
+            "rooms/" +
+            currentRoom +
+            "/members/" +
+            currentUser
+        );
+
+
+    memberRef.set({
+
+        name:currentUser,
+        online:true,
+        lastSeen:firebase.database.ServerValue.TIMESTAMP
+
+    });
+
+
+    memberRef.onDisconnect().remove();
+
+}
+
+
+/* =========================================================
+   BAN
+========================================================= */
+
+function checkBan(){
+
+    db.ref(
+        "banned_users/" + currentUser
+    ).on("value",snapshot=>{
+
+        if(snapshot.val() === true){
+
+            forceBlocked(
+                "🚫 تم حظر حسابك",
+                "تم منعك من استخدام التطبيق."
+            );
+
+        }
+
+    });
+
+}
+
+
+function forceBlocked(title,text){
+
+    document.body.innerHTML = `
+
+        <div class="block-screen">
+
+            <div>
+
+                <h1>${escapeHTML(title)}</h1>
+
+                <p style="color:#8b949e">
+                    ${escapeHTML(text)}
+                </p>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   MUTE
+========================================================= */
+
+function checkMute(){
+
+    db.ref(
+        "muted_users/" + currentUser
+    ).on("value",snapshot=>{
+
+        muteUntil =
+            Number(snapshot.val() || 0);
+
+        updateMuteState();
+
+    });
+
+}
+
+
+function updateMuteState(){
+
+    isMuted =
+        muteUntil > Date.now();
+
+    updateComposerState();
+
+}
+
+
+function updateComposerState(){
+
+    const input = $("message");
+    const send = $("send");
+
+    if(!input || !send) return;
+
+
+    if(settings.isFrozen === true){
+
+        input.disabled = true;
+        send.disabled = true;
+
+        input.placeholder =
+            "🛑 الشات مجمد من الأدمن";
+
+        return;
+
+    }
+
+
+    if(isMuted){
+
+        input.disabled = true;
+        send.disabled = true;
+
+        input.placeholder =
+            "🔇 أنت مكتوم مؤقتاً";
+
+        return;
+
+    }
+
+
+    input.disabled = false;
+    send.disabled = false;
+
+    input.placeholder =
+        "اكتب رسالتك...";
+
+}
+
+
+/* =========================================================
+   CHAT LISTENER
+========================================================= */
+
+function listenMessages(){
+
+    if(messageListener){
+
+        db.ref(currentChatPath)
+            .off("value",messageListener);
+
+    }
+
+
+    messageListener =
+        snapshot=>{
+
+            const data =
+                snapshot.val() || {};
+
+            const ids =
+                Object.keys(data);
+
+
+            const messages =
+                $("messages");
+
+            messages.innerHTML = "";
+
+
+            ids.forEach(id=>{
+
+                const msg =
+                    data[id];
+
+                markSeen(id,msg);
+
+                renderMessage(id,msg);
+
+            });
+
+
+            if(
+                ids.length >
+                lastMessageCount
+            ){
+
+                const last =
+                    data[ids[ids.length-1]];
+
+                if(
+                    last &&
+                    last.sender !== currentUser
+                ){
+
+                    playNotification();
+
+                }
+
             }
+
+
+            lastMessageCount =
+                ids.length;
+
+
+            setTimeout(()=>{
+
+                const tab =
+                    $("tab-chat");
+
+                tab.scrollTop =
+                    tab.scrollHeight;
+
+            },50);
+
+        };
+
+
+    db.ref(currentChatPath)
+        .on("value",messageListener);
+
+}
+
+
+function markSeen(id,msg){
+
+    if(
+        msg.sender !== currentUser &&
+        !(
+            msg.seenBy &&
+            msg.seenBy[currentUser]
+        )
+    ){
+
+        db.ref(
+            currentChatPath +
+            "/" +
+            id +
+            "/seenBy/" +
+            currentUser
+        ).set(true);
+
+    }
+
+}
+
+
+/* =========================================================
+   SEND MESSAGE
+========================================================= */
+
+function sendMessage(){
+
+    if(isMuted){
+
+        showToast("أنت مكتوم حالياً");
+        return;
+
+    }
+
+
+    if(settings.isFrozen){
+
+        showToast("الشات مجمد حالياً");
+        return;
+
+    }
+
+
+    const input =
+        $("message");
+
+    const raw =
+        input.value.trim();
+
+    if(!raw) return;
+
+
+    const text =
+        filterText(raw);
+
+
+    db.ref(currentChatPath)
+        .push({
+
+            sender:currentUser,
+            text:text,
+            timestamp:firebase.database.ServerValue.TIMESTAMP,
+            type:"text"
+
+        })
+        .then(()=>{
+
+            input.value = "";
+
+        })
+        .catch(()=>{
+
+            showToast(
+                "حدث خطأ أثناء إرسال الرسالة"
+            );
+
         });
 
-        /* --- 0. الربط المباشر مع لوحة الأدمن --- */
-        function listenToAdminSettings() {
-            db.ref('settings').on('value', (snapshot) => {
-                const settings = snapshot.val() || {};
+}
 
-                // 1. وضع الصيانة
-                if (settings.maintenance) {
-                    document.body.innerHTML = "<div style='color:white; text-align:center; padding: 20px;'><h1>🛠️ التطبيق قيد الصيانة حالياً</h1><p style='margin-top:10px; color:#8b949e;'>نعمل على تحسين الخدمات، يرجى العودة لاحقاً.</p></div>";
+
+$("message").addEventListener(
+    "keydown",
+    event=>{
+
+        if(event.key === "Enter"){
+
+            event.preventDefault();
+
+            sendMessage();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   RENDER MESSAGE
+========================================================= */
+
+function renderMessage(id,msg){
+
+    const box =
+        $("messages");
+
+    const isMe =
+        msg.sender === currentUser;
+
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className =
+        "message " +
+        (isMe ? "me" : "other");
+
+
+    const sender =
+        document.createElement("div");
+
+    sender.className =
+        "sender";
+
+
+    const badge =
+        badges[msg.sender] || "";
+
+
+    sender.innerHTML =
+        (badge
+            ? `<span class="badge">${escapeHTML(badge)}</span>`
+            : "") +
+        `<span>${escapeHTML(msg.sender || "")}</span>`;
+
+
+    const bubble =
+        document.createElement("div");
+
+    bubble.className =
+        "bubble";
+
+
+    if(msg.isPoll){
+
+        renderPoll(
+            bubble,
+            id,
+            msg
+        );
+
+    }else if(msg.type === "image"){
+
+        bubble.innerHTML = `
+
+            <img
+                src="${escapeHTML(msg.data)}"
+                style="
+                    max-width:100%;
+                    max-height:300px;
+                    border-radius:10px;
+                    display:block;
+                "
+            >
+
+        `;
+
+    }else if(msg.type === "audio"){
+
+        const audio =
+            document.createElement("audio");
+
+        audio.controls = true;
+
+        audio.src =
+            msg.data;
+
+        bubble.appendChild(audio);
+
+    }else{
+
+        bubble.textContent =
+            msg.text || "";
+
+    }
+
+
+    const time =
+        document.createElement("div");
+
+    time.className =
+        "msg-time";
+
+    time.textContent =
+        formatTime(msg.timestamp);
+
+
+    bubble.appendChild(time);
+
+
+    wrapper.appendChild(sender);
+
+    wrapper.appendChild(bubble);
+
+
+    const actions =
+        document.createElement("div");
+
+    actions.className =
+        "actions";
+
+
+    /* save */
+
+    const save =
+        document.createElement("button");
+
+    save.textContent =
+        "💾 حفظ";
+
+    save.onclick =
+        ()=>saveMessage(msg);
+
+
+    actions.appendChild(save);
+
+
+    /* report */
+
+    if(!isMe){
+
+        const report =
+            document.createElement("button");
+
+        report.textContent =
+            "🚨 إبلاغ";
+
+        report.onclick =
+            ()=>reportMessage(id,msg);
+
+        actions.appendChild(report);
+
+    }
+
+
+    /* delete own */
+
+    if(isMe){
+
+        const del =
+            document.createElement("button");
+
+        del.textContent =
+            "🗑️ حذف";
+
+        del.onclick =
+            ()=>deleteMessage(id);
+
+        actions.appendChild(del);
+
+    }
+
+
+    wrapper.appendChild(actions);
+
+    box.appendChild(wrapper);
+
+}
+
+
+/* =========================================================
+   DELETE
+========================================================= */
+
+function deleteMessage(id){
+
+    if(
+        !confirm("هل تريد حذف رسالتك؟")
+    ) return;
+
+
+    db.ref(
+        currentChatPath + "/" + id
+    ).remove();
+
+}
+
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+function saveMessage(msg){
+
+    const saved =
+        getSaved();
+
+    const key =
+        JSON.stringify(msg);
+
+
+    if(
+        saved.some(
+            item =>
+            JSON.stringify(item) === key
+        )
+    ){
+
+        showToast("الرسالة محفوظة بالفعل");
+        return;
+
+    }
+
+
+    saved.unshift(msg);
+
+    if(saved.length > 100){
+
+        saved.length = 100;
+
+    }
+
+
+    setSaved(saved);
+
+    showToast("💾 تم حفظ الرسالة");
+
+}
+
+
+/* =========================================================
+   SAVED
+========================================================= */
+
+function loadSaved(){
+
+    const container =
+        $("saved");
+
+    const data =
+        getSaved();
+
+
+    container.innerHTML = "";
+
+
+    if(!data.length){
+
+        container.innerHTML = `
+
+            <div class="card">
+                <p class="muted">
+                    لا توجد رسائل محفوظة.
+                </p>
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    data.forEach((msg,index)=>{
+
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "saved-item";
+
+
+        const sender =
+            document.createElement("b");
+
+        sender.textContent =
+            msg.sender || "مستخدم";
+
+
+        item.appendChild(sender);
+
+
+        const text =
+            document.createElement("div");
+
+        text.style.marginTop =
+            "5px";
+
+        text.textContent =
+            msg.text ||
+            (
+                msg.type === "image"
+                    ? "📷 صورة"
+                    : msg.type === "audio"
+                        ? "🎤 تسجيل صوتي"
+                        : "محتوى"
+            );
+
+
+        item.appendChild(text);
+
+
+        const del =
+            document.createElement("button");
+
+        del.className =
+            "small-btn";
+
+        del.style.marginTop =
+            "8px";
+
+        del.style.background =
+            "var(--danger)";
+
+        del.textContent =
+            "إزالة";
+
+
+        del.onclick =
+            ()=>{
+
+                data.splice(index,1);
+
+                setSaved(data);
+
+                loadSaved();
+
+            };
+
+
+        item.appendChild(del);
+
+        container.appendChild(item);
+
+    });
+
+}
+
+
+/* =========================================================
+   REPORT
+========================================================= */
+
+function reportMessage(id,msg){
+
+    const reason =
+        prompt(
+            "اكتب سبب البلاغ:",
+            "رسالة مسيئة"
+        );
+
+
+    if(!reason) return;
+
+
+    db.ref("reports").push({
+
+        reporter:currentUser,
+        reportedUser:msg.sender,
+        messageText:msg.text || "محتوى",
+        reason:filterText(reason),
+        messageId:id,
+        room:currentRoom,
+        timestamp:firebase.database.ServerValue.TIMESTAMP
+
+    });
+
+
+    showToast("🚨 تم إرسال البلاغ");
+
+}
+
+
+/* =========================================================
+   PINNED
+========================================================= */
+
+function listenPinned(){
+
+    if(pinnedListener){
+
+        db.ref(
+            "rooms/" +
+            currentRoom +
+            "/pinned"
+        ).off(
+            "value",
+            pinnedListener
+        );
+
+    }
+
+
+    pinnedListener =
+        snapshot=>{
+
+            const value =
+                snapshot.val();
+
+
+            if(value){
+
+                $("pinned-text").textContent =
+                    value;
+
+                $("pinned")
+                    .classList
+                    .remove("hidden");
+
+            }else{
+
+                $("pinned")
+                    .classList
+                    .add("hidden");
+
+            }
+
+        };
+
+
+    db.ref(
+        "rooms/" +
+        currentRoom +
+        "/pinned"
+    ).on(
+        "value",
+        pinnedListener
+    );
+
+}
+
+
+/*
+   المستخدم العادي لا يستطيع التحكم في
+   pinned_message الخاص بالأدمن.
+*/
+function removeOwnPin(){
+
+    showToast(
+        "📌 الرسالة المثبتة يديرها الأدمن"
+    );
+
+}
+
+
+/* =========================================================
+   POLLS
+========================================================= */
+
+function openPoll(){
+
+    if(isMuted || settings.isFrozen){
+
+        showToast("لا يمكنك إنشاء استطلاع حالياً");
+        return;
+
+    }
+
+    $("poll-modal")
+        .classList
+        .remove("hidden");
+
+}
+
+
+function closePoll(){
+
+    $("poll-modal")
+        .classList
+        .add("hidden");
+
+}
+
+
+function createPoll(){
+
+    const question =
+        $("poll-question").value.trim();
+
+    const op1 =
+        $("poll-op1").value.trim();
+
+    const op2 =
+        $("poll-op2").value.trim();
+
+
+    if(!question || !op1 || !op2){
+
+        showToast(
+            "أكمل بيانات الاستطلاع"
+        );
+
+        return;
+
+    }
+
+
+    db.ref(currentChatPath)
+        .push({
+
+            sender:currentUser,
+
+            isPoll:true,
+
+            question:
+                filterText(question),
+
+            options:{
+
+                op1:{
+                    text:filterText(op1),
+                    votes:0
+                },
+
+                op2:{
+                    text:filterText(op2),
+                    votes:0
+                }
+
+            },
+
+            voters:{},
+
+            timestamp:
+                firebase.database.ServerValue.TIMESTAMP
+
+        });
+
+
+    $("poll-question").value = "";
+    $("poll-op1").value = "";
+    $("poll-op2").value = "";
+
+    closePoll();
+
+}
+
+
+function renderPoll(container,id,msg){
+
+    container.innerHTML = "";
+
+    const title =
+        document.createElement("b");
+
+    title.textContent =
+        "📊 " +
+        (msg.question || "استطلاع");
+
+
+    container.appendChild(title);
+
+
+    const poll =
+        document.createElement("div");
+
+    poll.className =
+        "poll";
+
+
+    ["op1","op2"].forEach(key=>{
+
+        if(!msg.options ||
+           !msg.options[key]) return;
+
+
+        const option =
+            msg.options[key];
+
+
+        const btn =
+            document.createElement("button");
+
+        btn.className =
+            "poll-option";
+
+
+        const text =
+            document.createElement("span");
+
+        text.textContent =
+            option.text;
+
+
+        const votes =
+            document.createElement("span");
+
+        votes.textContent =
+            "(" +
+            (option.votes || 0) +
+            ")";
+
+
+        btn.appendChild(text);
+        btn.appendChild(votes);
+
+
+        btn.onclick =
+            ()=>votePoll(id,key);
+
+
+        poll.appendChild(btn);
+
+    });
+
+
+    container.appendChild(poll);
+
+}
+
+
+function votePoll(id,key){
+
+    const voterPath =
+        currentChatPath +
+        "/" +
+        id +
+        "/voters/" +
+        currentUser;
+
+
+    db.ref(voterPath)
+        .once("value")
+        .then(snapshot=>{
+
+            if(snapshot.exists()){
+
+                showToast(
+                    "لقد صوتت بالفعل في هذا الاستطلاع"
+                );
+
+                return;
+
+            }
+
+
+            const votesPath =
+                currentChatPath +
+                "/" +
+                id +
+                "/options/" +
+                key +
+                "/votes";
+
+
+            db.ref(votesPath)
+                .transaction(value =>
+                    (value || 0) + 1
+                )
+                .then(()=>{
+
+                    return db.ref(
+                        voterPath
+                    ).set(true);
+
+                });
+
+        });
+
+}
+
+
+/* =========================================================
+   MEMBERS
+========================================================= */
+
+function listenMembers(){
+
+    if(memberListener){
+
+        db.ref(
+            "rooms/" +
+            currentRoom +
+            "/members"
+        ).off(
+            "value",
+            memberListener
+        );
+
+    }
+
+
+    memberListener =
+        snapshot=>{
+
+            members =
+                snapshot.val() || {};
+
+            renderMembers();
+
+        };
+
+
+    db.ref(
+        "rooms/" +
+        currentRoom +
+        "/members"
+    ).on(
+        "value",
+        memberListener
+    );
+
+}
+
+
+function renderMembers(){
+
+    const container =
+        $("members");
+
+    if(!container) return;
+
+    container.innerHTML = "";
+
+
+    const query =
+        ($("member-search")?.value || "")
+        .toLowerCase();
+
+
+    Object.keys(members).forEach(uid=>{
+
+        const member =
+            members[uid];
+
+
+        if(!member ||
+           member.name === currentUser)
+            return;
+
+
+        const name =
+            member.name || uid;
+
+
+        if(
+            query &&
+            !name.toLowerCase().includes(query)
+        ) return;
+
+
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "member";
+
+
+        item.innerHTML = `
+
+            <div class="member-info">
+
+                <span class="online"></span>
+
+                <span>${escapeHTML(name)}</span>
+
+            </div>
+
+            <button
+                class="small-btn"
+                onclick="startPrivateChat('${escapeHTML(name)}')"
+            >
+                خاص 🔒
+            </button>
+
+        `;
+
+
+        container.appendChild(item);
+
+    });
+
+}
+
+
+function filterMembers(){
+
+    renderMembers();
+
+}
+
+
+/* =========================================================
+   PRIVATE CHAT
+========================================================= */
+
+function startPrivateChat(target){
+
+    const code =
+        localStorage.getItem(
+            "squadlink_passcode"
+        );
+
+
+    if(code){
+
+        const entered =
+            prompt(
+                "أدخل الرمز السري:"
+            );
+
+
+        if(entered !== code){
+
+            showToast(
+                "❌ الرمز السري غير صحيح"
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    const users =
+        [currentUser,target]
+        .sort();
+
+
+    const privateId =
+        users[0] +
+        "_private_" +
+        users[1];
+
+
+    currentChatPath =
+        "private_chats/" +
+        privateId;
+
+
+    $("header-title").textContent =
+        "خاص مع: " + target;
+
+
+    $("back-room")
+        .classList
+        .remove("hidden");
+
+
+    lastMessageCount = 0;
+
+    listenMessages();
+
+    switchTab("chat");
+
+}
+
+
+function goPublicChat(){
+
+    currentChatPath =
+        "rooms/" +
+        currentRoom +
+        "/messages";
+
+
+    $("header-title").textContent =
+        "غرفة: " + currentRoom;
+
+
+    $("back-room")
+        .classList
+        .add("hidden");
+
+
+    lastMessageCount = 0;
+
+    listenMessages();
+
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function postStatus(){
+
+    if(isMuted){
+
+        showToast("أنت مكتوم حالياً");
+        return;
+
+    }
+
+
+    const input =
+        $("status-text");
+
+    const raw =
+        input.value.trim();
+
+
+    if(!raw) return;
+
+
+    db.ref(
+        "rooms/" +
+        currentRoom +
+        "/statuses"
+    ).push({
+
+        sender:currentUser,
+
+        text:filterText(raw),
+
+        timestamp:
+            firebase.database.ServerValue.TIMESTAMP
+
+    });
+
+
+    input.value = "";
+
+    showToast("⭕ تم نشر الحالة");
+
+}
+
+
+function listenStatuses(){
+
+    if(statusListener){
+
+        db.ref(
+            "rooms/" +
+            currentRoom +
+            "/statuses"
+        ).off(
+            "value",
+            statusListener
+        );
+
+    }
+
+
+    statusListener =
+        snapshot=>{
+
+            const container =
+                $("statuses");
+
+            container.innerHTML = "";
+
+
+            const data =
+                snapshot.val() || {};
+
+
+            Object.keys(data)
+                .reverse()
+                .forEach(id=>{
+
+                    const status =
+                        data[id];
+
+
+                    const item =
+                        document.createElement("div");
+
+                    item.className =
+                        "status";
+
+
+                    item.innerHTML = `
+
+                        <b>
+                            ${escapeHTML(status.sender)}
+                        </b>
+
+                        <div style="margin-top:5px">
+                            ${escapeHTML(status.text)}
+                        </div>
+
+                        <div class="msg-time">
+                            ${formatTime(status.timestamp)}
+                        </div>
+
+                    `;
+
+
+                    container.appendChild(item);
+
+                });
+
+        };
+
+
+    db.ref(
+        "rooms/" +
+        currentRoom +
+        "/statuses"
+    ).on(
+        "value",
+        statusListener
+    );
+
+}
+
+
+/* =========================================================
+   SUPPORT
+========================================================= */
+
+function sendSupportTicket(){
+
+    const input =
+        $("support-text");
+
+    const text =
+        input.value.trim();
+
+
+    if(!text){
+
+        showToast(
+            "اكتب التذكرة أولاً"
+        );
+
+        return;
+
+    }
+
+
+    db.ref("support_tickets")
+        .push({
+
+            sender:currentUser,
+
+            message:filterText(text),
+
+            timestamp:
+                firebase.database.ServerValue.TIMESTAMP,
+
+            status:"open"
+
+        })
+        .then(()=>{
+
+            input.value = "";
+
+            showToast(
+                "🎫 تم إرسال تذكرة الدعم"
+            );
+
+        });
+
+}
+
+
+/* =========================================================
+   THEME
+========================================================= */
+
+function changeTheme(theme){
+
+    document.body.classList.remove(
+        "light",
+        "cyber"
+    );
+
+
+    if(theme === "light")
+        document.body.classList.add("light");
+
+    if(theme === "cyber")
+        document.body.classList.add("cyber");
+
+
+    localStorage.setItem(
+        "squadlink_theme",
+        theme
+    );
+
+}
+
+
+function loadTheme(){
+
+    const theme =
+        localStorage.getItem(
+            "squadlink_theme"
+        ) || "dark";
+
+
+    changeTheme(theme);
+
+
+    window.addEventListener(
+        "DOMContentLoaded",
+        ()=>{
+            $("theme-select").value =
+                theme;
+        }
+    );
+
+}
+
+
+/* =========================================================
+   PASSCODE
+========================================================= */
+
+function savePasscode(){
+
+    const code =
+        $("passcode").value.trim();
+
+
+    if(!code){
+
+        localStorage.removeItem(
+            "squadlink_passcode"
+        );
+
+        showToast(
+            "تم إلغاء رمز القفل"
+        );
+
+        return;
+
+    }
+
+
+    localStorage.setItem(
+        "squadlink_passcode",
+        code
+    );
+
+
+    $("passcode").value = "";
+
+    showToast(
+        "🔒 تم حفظ الرمز السري"
+    );
+
+}
+
+
+/* =========================================================
+   FILE / IMAGE
+========================================================= */
+
+function handleFile(event){
+
+    const file =
+        event.target.files[0];
+
+
+    event.target.value = "";
+
+
+    if(!file) return;
+
+
+    if(!file.type.startsWith("image/")){
+
+        showToast(
+            "يسمح حالياً بالصور فقط"
+        );
+
+        return;
+
+    }
+
+
+    if(file.size > 700 * 1024){
+
+        showToast(
+            "الصورة كبيرة جداً. الحد 700KB"
+        );
+
+        return;
+
+    }
+
+
+    if(isMuted || settings.isFrozen){
+
+        showToast(
+            "لا يمكنك الإرسال حالياً"
+        );
+
+        return;
+
+    }
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload =
+        ()=>{
+
+            db.ref(currentChatPath)
+                .push({
+
+                    sender:currentUser,
+
+                    type:"image",
+
+                    data:reader.result,
+
+                    timestamp:
+                        firebase.database.ServerValue.TIMESTAMP
+
+                });
+
+        };
+
+
+    reader.readAsDataURL(file);
+
+}
+
+
+/* =========================================================
+   AUDIO
+========================================================= */
+
+async function toggleRecording(){
+
+    if(isMuted || settings.isFrozen){
+
+        showToast(
+            "لا يمكنك التسجيل حالياً"
+        );
+
+        return;
+
+    }
+
+
+    if(recording){
+
+        if(mediaRecorder){
+
+            mediaRecorder.stop();
+
+        }
+
+        return;
+
+    }
+
+
+    if(!navigator.mediaDevices ||
+       !navigator.mediaDevices.getUserMedia){
+
+        showToast(
+            "المتصفح لا يدعم التسجيل الصوتي"
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        const stream =
+            await navigator.mediaDevices
+                .getUserMedia({
+                    audio:true
+                });
+
+
+        audioChunks = [];
+
+
+        mediaRecorder =
+            new MediaRecorder(stream);
+
+
+        mediaRecorder.ondataavailable =
+            event=>{
+
+                if(event.data.size){
+
+                    audioChunks.push(
+                        event.data
+                    );
+
+                }
+
+            };
+
+
+        mediaRecorder.onstop =
+            ()=>{
+
+                stream
+                    .getTracks()
+                    .forEach(
+                        track=>track.stop()
+                    );
+
+
+                const blob =
+                    new Blob(
+                        audioChunks,
+                        {
+                            type:
+                            "audio/webm"
+                        }
+                    );
+
+
+                if(blob.size > 900 * 1024){
+
+                    showToast(
+                        "التسجيل كبير جداً"
+                    );
+
                     return;
+
                 }
 
-                // 2. تجميد المحادثة
-                const msgInput = document.getElementById('message-text');
-                const sendBtn = document.getElementById('send-msg-btn');
-                if (msgInput && sendBtn) {
-                    if (settings.isFrozen) {
-                        msgInput.disabled = true;
-                        msgInput.placeholder = "🛑 الشات مجمد حالياً من الأدمن...";
-                        sendBtn.disabled = true;
-                        sendBtn.style.opacity = "0.5";
-                    } else {
-                        msgInput.disabled = false;
-                        msgInput.placeholder = "اكتب رسالتك...";
-                        sendBtn.disabled = false;
-                        sendBtn.style.opacity = "1";
-                    }
-                }
 
-                // 3. تغيير الثيم الحي (اللون الرئيسي)
-                if (settings.app_theme_color) {
-                    document.documentElement.style.setProperty('--accent-color', settings.app_theme_color);
-                }
+                const reader =
+                    new FileReader();
 
-                // 4. عرض الرسالة المثبتة القادمة من اللوحة
-                if (settings.pinned_message) {
-                    document.getElementById('pinned-text').innerText = settings.pinned_message;
-                    document.getElementById('pinned-bar').classList.remove('hidden');
-                }
 
-                // 5. تحديث قائمة الكلمات المسيئة (دعم الصيغتين الكائن والمصفوفة)
-                if (settings.badWords) {
-                    if (Array.isArray(settings.badWords)) {
-                        badWordsList = settings.badWords;
-                    } else if (typeof settings.badWords === 'object') {
-                        badWordsList = Object.keys(settings.badWords).concat(Object.values(settings.badWords));
-                    }
-                } else if (settings.bad_words) {
-                    badWordsList = Object.keys(settings.bad_words);
-                }
-            });
+                reader.onload =
+                    ()=>{
+
+                        db.ref(
+                            currentChatPath
+                        ).push({
+
+                            sender:currentUser,
+
+                            type:"audio",
+
+                            data:reader.result,
+
+                            timestamp:
+                                firebase.database.ServerValue.TIMESTAMP
+
+                        });
+
+                    };
+
+
+                reader.readAsDataURL(blob);
+
+            };
+
+
+        mediaRecorder.start();
+
+        recording = true;
+
+        $("mic-btn").textContent =
+            "⏹️";
+
+
+        showToast(
+            "🎤 جاري التسجيل..."
+        );
+
+    }catch(error){
+
+        showToast(
+            "لم يتم السماح باستخدام الميكروفون"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   BROADCAST
+========================================================= */
+
+let lastBroadcastTime = 0;
+
+db.ref("settings/broadcast")
+    .on("value",snapshot=>{
+
+        const data =
+            snapshot.val();
+
+
+        if(!data || !data.time)
+            return;
+
+
+        if(
+            data.time <= lastBroadcastTime
+        ) return;
+
+
+        lastBroadcastTime =
+            data.time;
+
+
+        if(
+            currentUser &&
+            Date.now() - data.time < 30000
+        ){
+
+            showToast(
+                "📢 " +
+                (data.text || "")
+            );
+
         }
 
-        // جلب الرتب للشات
-        function listenToUserBadges() {
-            db.ref('users').on('value', (snapshot) => {
-                const users = snapshot.val() || {};
-                usersBadges = {};
-                Object.keys(users).forEach(u => {
-                    if (users[u] && users[u].badge) {
-                        usersBadges[u] = users[u].badge;
-                    }
-                });
-            });
-        }
+    });
 
-        // فحص الحظر
-        function checkUserBan(user) {
-            db.ref('banned_users/' + user).on('value', (snapshot) => {
-                if (snapshot.val() === true) {
-                    document.body.innerHTML = "<div style='color:#ef4444; text-align:center; padding: 20px;'><h1>🚫 تم حظر حسابك من استخدام التطبيق</h1><p style='margin-top:10px; color:#8b949e;'>إذا كنت تعتقد أن هذا عن طريق الخطأ، يرجى التواصل مع الدعم.</p></div>";
-                }
-            });
-        }
 
-        // فلترة النصوص المسيئة
-        function filterText(text) {
-            let filtered = text;
-            badWordsList.forEach(word => {
-                if (!word || typeof word !== 'string') return;
-                const regex = new RegExp(word, "gi");
-                filtered = filtered.replace(regex, "***");
-            });
-            return filtered;
-        }
+/* =========================================================
+   NAVIGATION
+========================================================= */
 
-        function saveAndJoin() {
-            const user = document.getElementById('username-input').value.trim();
-            const room = document.getElementById('room-input').value.trim();
-            if (!user || !room) return alert("من فضلك أدخل البيانات!");
-            localStorage.setItem('squadlink_user', user);
-            localStorage.setItem('squadlink_room', room);
-            joinRoom(user, room);
-        }
+function switchTab(tab){
 
-        function joinRoom(user, room) {
-            currentUser = user;
-            currentRoom = room;
-            currentChatPath = 'rooms/' + currentRoom + '/messages';
+    currentTab = tab;
 
-            // مراقبة حظر المستخدم فور دخوله
-            checkUserBan(currentUser);
 
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('chat-header').classList.remove('hidden');
-            document.getElementById('bottom-nav').classList.remove('hidden');
-            
-            document.getElementById('room-name-display').innerText = "غرفة: " + currentRoom;
-            document.getElementById('header-avatar').innerText = currentUser.charAt(0).toUpperCase();
+    document.querySelectorAll(".tab")
+        .forEach(el =>
+            el.classList.remove("active")
+        );
 
-            // تسجيل المستخدم في الفايربيس للوحة التحكم
-            db.ref('users/' + currentUser).update({ username: currentUser, lastSeen: Date.now() });
-            db.ref('rooms/' + currentRoom + '/members/' + currentUser).set({ name: currentUser, online: true });
-            db.ref('rooms/' + currentRoom + '/members/' + currentUser).onDisconnect().remove();
 
-            switchTab('chat');
-            listenToMessages();
-            listenToMembers();
-            listenToStatuses();
-            listenToPinnedMsg();
-        }
+    document.querySelectorAll(".nav button")
+        .forEach(el =>
+            el.classList.remove("active")
+        );
 
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active', 'hidden'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
 
-            document.getElementById('tab-' + tabName).classList.add('active');
-            document.getElementById('nav-' + tabName).classList.add('active');
-            if (tabName === 'saved') loadSavedItems();
-        }
+    const target =
+        $("tab-" + tab);
 
-        /* Chat & Seen Receipts */
-        function listenToMessages() {
-            db.ref(currentChatPath).off();
-            db.ref(currentChatPath).on('value', (snapshot) => {
-                const list = document.getElementById('messages-list');
-                list.innerHTML = "";
-                const data = snapshot.val();
-                if (!data) return;
+    if(target)
+        target.classList.add("active");
 
-                Object.keys(data).forEach(id => {
-                    const msg = data[id];
-                    if (msg.sender !== currentUser && (!msg.seenBy || !msg.seenBy[currentUser])) {
-                        db.ref(currentChatPath + '/' + id + '/seenBy/' + currentUser).set(true);
-                    }
-                    renderMessage(id, msg);
-                });
-                list.parentElement.scrollTop = list.parentElement.scrollHeight;
-            });
-        }
 
-        function sendMsg() {
-            const input = document.getElementById('message-text');
-            const rawText = input.value.trim();
-            if (!rawText) return;
+    const nav =
+        $("nav-" + tab);
 
-            // فلترة الرسالة من الكلمات المسيئة
-            const cleanText = filterText(rawText);
+    if(nav)
+        nav.classList.add("active");
 
-            db.ref(currentChatPath).push({ sender: currentUser, text: cleanText, timestamp: Date.now() });
-            input.value = "";
-        }
 
-        /* Pinned Messages */
-        function pinMsg(text) {
-            db.ref('rooms/' + currentRoom + '/pinned').set(text);
-        }
-        function unpinMsg() {
-            db.ref('rooms/' + currentRoom + '/pinned').remove();
-        }
-        function listenToPinnedMsg() {
-            db.ref('rooms/' + currentRoom + '/pinned').on('value', (snapshot) => {
-                const text = snapshot.val();
-                const bar = document.getElementById('pinned-bar');
-                if (text) {
-                    document.getElementById('pinned-text').innerText = text;
-                    bar.classList.remove('hidden');
-                } else {
-                    bar.classList.add('hidden');
-                }
-            });
-        }
+    if(tab === "saved"){
 
-        /* Polls */
-        function togglePollModal() { document.getElementById('poll-modal').classList.toggle('hidden'); }
-        function createPoll() {
-            const q = document.getElementById('poll-q').value, op1 = document.getElementById('poll-op1').value, op2 = document.getElementById('poll-op2').value;
-            if (!q || !op1 || !op2) return alert("أكمل بيانات التصويت!");
-            
-            db.ref(currentChatPath).push({
-                sender: currentUser, isPoll: true, question: filterText(q),
-                options: { op1: { text: filterText(op1), votes: 0 }, op2: { text: filterText(op2), votes: 0 } },
-                timestamp: Date.now()
-            });
-            togglePollModal();
-        }
-        function votePoll(msgId, opKey) {
-            db.ref(currentChatPath + '/' + msgId + '/options/' + opKey + '/votes').transaction(v => (v || 0) + 1);
-        }
+        loadSaved();
 
-        function renderMessage(msgId, msg) {
-            const list = document.getElementById('messages-list');
-            const isMe = msg.sender === currentUser;
-            const div = document.createElement('div');
-            div.className = `msg-wrapper ${isMe ? 'msg-sent' : 'msg-received'}`;
+    }
 
-            let content = msg.text ? `<div>${msg.text}</div>` : '';
-            
-            // Poll
-            if (msg.isPoll) {
-                content = `
-                    <div class="poll-box">
-                        <strong>📊 ${msg.question}</strong>
-                        <button class="poll-option-btn" onclick="votePoll('${msgId}', 'op1')"><span>${msg.options.op1.text}</span> <span>(${msg.options.op1.votes || 0})</span></button>
-                        <button class="poll-option-btn" onclick="votePoll('${msgId}', 'op2')"><span>${msg.options.op2.text}</span> <span>(${msg.options.op2.votes || 0})</span></button>
-                    </div>
-                `;
-            }
+}
 
-            // Seen check
-            const seenCount = msg.seenBy ? Object.keys(msg.seenBy).length : 0;
-            const seenHTML = isMe ? `<span class="seen-status">${seenCount > 0 ? '✔️✔️' : '✔️'}</span>` : '';
 
-            // Badge
-            const badgeText = usersBadges[msg.sender];
-            const badgeHTML = badgeText ? `<span class="user-badge">${badgeText}</span>` : '';
+/* =========================================================
+   LOGOUT
+========================================================= */
 
-            div.innerHTML = `
-                <div class="msg-sender">${badgeHTML} ${msg.sender} ${seenHTML}</div>
-                <div class="msg-bubble">
-                    ${content}
-                    <div class="action-bar-sm">
-                        <span onclick="pinMsg('${(msg.text || 'استطلاع').replace(/'/g, "\\'")}')">تثبيت 📌</span>
-                        ${isMe ? `<span style="color:#ef4444;" onclick="db.ref('${currentChatPath}/${msgId}').remove()">مسح 🗑️</span>` : ''}
-                    </div>
-                </div>
-            `;
-            list.appendChild(div);
-        }
+function logout(){
 
-        /* Support Tickets */
-        function sendSupportTicket() {
-            const input = document.getElementById('support-ticket-text');
-            const text = input.value.trim();
-            if (!text) return alert("يرجى كتابة نص التذكرة أولاً!");
+    if(
+        currentUser &&
+        currentRoom
+    ){
 
-            db.ref('support_tickets').push({
-                sender: currentUser,
-                message: filterText(text),
-                timestamp: Date.now()
-            });
+        db.ref(
+            "rooms/" +
+            currentRoom +
+            "/members/" +
+            currentUser
+        ).remove();
 
-            alert("تم إرسال تذكرتك للدعم الفني بنجاح!");
-            input.value = "";
-        }
+    }
 
-        /* Private Chat Lock & Themes */
-        function savePasscode() {
-            const code = document.getElementById('passcode-input').value;
-            localStorage.setItem('squadlink_passcode', code);
-            alert("تم حفظ الرمز السري بنجاح!");
-        }
 
-        function startPrivateChat(targetUser) {
-            const savedCode = localStorage.getItem('squadlink_passcode');
-            if (savedCode) {
-                const input = prompt("أدخل الرمز السري للمحادثة الخاصة:");
-                if (input !== savedCode) return alert("رمز سري خاطئ!");
-            }
+    localStorage.removeItem(
+        "squadlink_user"
+    );
 
-            const privateChatId = [currentUser, targetUser].sort().join('_private_');
-            currentChatPath = 'private_chats/' + privateChatId;
-            document.getElementById('room-name-display').innerText = "خاص مع: " + targetUser;
-            document.getElementById('back-to-room-btn').classList.remove('hidden');
-            switchTab('chat');
-            listenToMessages();
-        }
+    localStorage.removeItem(
+        "squadlink_room"
+    );
 
-        function changeTheme(theme) {
-            document.body.className = theme === 'light' ? 'theme-light' : (theme === 'cyber' ? 'theme-cyber' : '');
-        }
 
-        function resetToRoomChat() {
-            currentChatPath = 'rooms/' + currentRoom + '/messages';
-            document.getElementById('room-name-display').innerText = "غرفة: " + currentRoom;
-            document.getElementById('back-to-room-btn').classList.add('hidden');
-            switchTab('chat');
-            listenToMessages();
-        }
+    location.reload();
 
-        function listenToMembers() {
-            db.ref('rooms/' + currentRoom + '/members').on('value', (snapshot) => {
-                const list = document.getElementById('members-list');
-                list.innerHTML = "";
-                const data = snapshot.val();
-                if (!data) return;
-                Object.values(data).forEach(m => {
-                    if (m.name === currentUser) return;
-                    const item = document.createElement('div');
-                    item.className = "member-item";
-                    item.innerHTML = `<span>${m.name}</span><button class="btn-sm" onclick="startPrivateChat('${m.name}')">خاص 🔒</button>`;
-                    list.appendChild(item);
-                });
-            });
-        }
+}
 
-        function filterMembers() {
-            const q = document.getElementById('search-member-input').value.toLowerCase();
-            document.querySelectorAll('#members-list .member-item').forEach(item => {
-                const name = item.querySelector('span').innerText.toLowerCase();
-                item.style.display = name.includes(q) ? 'flex' : 'none';
-            });
-        }
 
-        function postStatus() {
-            const text = document.getElementById('status-text').value.trim();
-            if (!text) return;
-            const cleanStatus = filterText(text);
-            db.ref('rooms/' + currentRoom + '/statuses').push({ sender: currentUser, text: cleanStatus, timestamp: Date.now() });
-            document.getElementById('status-text').value = "";
-        }
+/* =========================================================
+   NOTIFICATION
+========================================================= */
 
-        function listenToStatuses() {
-            db.ref('rooms/' + currentRoom + '/statuses').on('value', (snapshot) => {
-                const list = document.getElementById('statuses-list');
-                list.innerHTML = "";
-                const data = snapshot.val();
-                if (!data) return;
-                Object.values(data).reverse().forEach(s => {
-                    const item = document.createElement('div');
-                    item.className = "home-card";
-                    item.innerHTML = `<strong>${s.sender}</strong><div>${s.text}</div>`;
-                    list.appendChild(item);
-                });
-            });
-        }
+function playNotification(){
 
-        function logout() { localStorage.clear(); location.reload(); }
-    </script>
+    const audio =
+        $("notification-sound");
+
+
+    if(!audio) return;
+
+
+    audio.currentTime = 0;
+
+
+    audio.play().catch(
+        ()=>{}
+    );
+
+}
+
+</script>
+
 </body>
 </html>
