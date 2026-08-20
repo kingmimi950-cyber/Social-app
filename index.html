@@ -39,6 +39,7 @@ body { display: flex; justify-content: center; align-items: center; }
 .field { width: 100%; background: var(--input); border: 1px solid var(--border); color: var(--text); border-radius: 12px; padding: 13px 14px; outline: none; margin: 5px 0; }
 .field:focus { border-color: var(--accent); }
 .primary { width: 100%; border: 0; border-radius: 12px; padding: 13px; background: var(--accent); color: #fff; font-weight: 800; margin-top: 8px; }
+.secondary { width: 100%; border: 1px solid var(--accent); border-radius: 12px; padding: 11px; background: transparent; color: var(--accent); font-weight: 800; margin-top: 8px; }
 
 .header { height: 64px; min-height: 64px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--panel); }
 .head-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -81,7 +82,8 @@ body { display: flex; justify-content: center; align-items: center; }
 .member, .status, .saved { padding: 12px; background: var(--input); border: 1px solid var(--border); border-radius: 11px; margin-top: 8px; }
 .member { display: flex; align-items: center; justify-content: space-between; }
 .member-left { display: flex; align-items: center; gap: 8px; }
-.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--success); }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+.dot.online-dot { background: var(--success); }
 .small { border: 0; background: var(--accent); color: #fff; border-radius: 8px; padding: 7px 10px; font-size: 11px; }
 .danger { background: var(--danger) !important; }
 
@@ -106,10 +108,11 @@ audio { width: 100%; margin-top: 5px; height: 36px; }
     <div class="logo">SquadLink 🚀</div>
     <div class="subtitle">منصة تواصل اجتماعي سريعة وبسيطة</div>
     <input id="username" class="field" maxlength="30" placeholder="اسم المستخدم">
-    <input id="userPhone" class="field" maxlength="15" placeholder="رقم الهاتف (للبحث عنك بها)">
-    <input id="room" class="field" maxlength="30" placeholder="رمز الغرفة">
-    <button id="loginBtn" class="primary">دخول التطبيق</button>
-    <p class="muted">استخدم حروفاً وأرقاماً ومسافات فقط في الاسم والغرفة.</p>
+    <input id="userPhone" class="field" maxlength="15" placeholder="رقم الهاتف (اختياري)">
+    <input id="room" class="field" maxlength="30" placeholder="رمز الغرفة (أدخل كود للإنضمام)">
+    
+    <button id="loginBtn" class="primary">دخول الغرفة</button>
+    <button id="createRoomBtn" class="secondary">➕ إنشاء غرفة جديدة وتوليد كود</button>
   </div>
 </section>
 
@@ -122,6 +125,7 @@ audio { width: 100%; margin-top: 5px; height: 36px; }
     </div>
   </div>
   <div class="head-actions">
+    <button id="copyRoomBtn" class="icon" title="نسخ كود الغرفة">📋</button>
     <button id="backBtn" class="icon hidden">🏠</button>
     <button id="logoutBtn" class="icon">🚪</button>
   </div>
@@ -131,7 +135,7 @@ audio { width: 100%; margin-top: 5px; height: 36px; }
   <section id="tab-home" class="tab">
     <div class="card">
       <h3>👋 أهلاً بك</h3>
-      <p class="muted">مرحباً <b id="homeUser"></b> — الغرفة: <b id="homeRoom"></b></p>
+      <p class="muted">مرحباً <b id="homeUser"></b> — رمز الغرفة الحالية: <b id="homeRoom"></b></p>
       <select id="theme" class="field">
         <option value="dark">🌙 غامق</option>
         <option value="light">☀️ فاتح</option>
@@ -161,7 +165,7 @@ audio { width: 100%; margin-top: 5px; height: 36px; }
   </section>
 
   <section id="tab-members" class="tab">
-    <input id="memberSearch" class="field" placeholder="🔍 ابحث في أعضاء التطبيق بالاسم أو رقم الهاتف">
+    <input id="memberSearch" class="field" placeholder="🔍 ابحث في الأعضاء بالاسم أو الهاتف">
     <div id="members"></div>
   </section>
 
@@ -257,10 +261,28 @@ function theme(t) {
 $('theme').onchange = e => theme(e.target.value);
 theme(localStorage.getItem('sl_theme') || 'dark');
 
+// توليد رمز غرفة عشوائي فريد
+function generateRoomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'SL-';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+$('createRoomBtn').onclick = () => {
+  let u = $('username').value.trim();
+  if (!u) return toast('يرجى أدخال اسم المستخدم أولاً');
+  let newRoomCode = generateRoomCode();
+  $('room').value = newRoomCode;
+  toast('تم توليد كود الغرفة: ' + newRoomCode);
+};
+
 function login() {
   let u = $('username').value.trim(), r = $('room').value.trim(), p = $('userPhone').value.trim();
-  if (!u || !r) return toast('اكتب الاسم والغرفة');
-  if (!valid(u) || !valid(r)) return toast('الاسم أو الغرفة تحتوي على رمز غير مسموح');
+  if (!u || !r) return toast('اكتب الاسم ورمز الغرفة');
+  if (!valid(u) || !valid(r)) return toast('الاسم أو الغرفة تحتوي على رموز غير مسموحة');
   localStorage.setItem('sl_user', u);
   localStorage.setItem('sl_room', r);
   if (p) localStorage.setItem('sl_phone', p);
@@ -268,9 +290,6 @@ function login() {
 }
 
 $('loginBtn').onclick = login;
-$('username').onkeydown = e => { if (e.key === 'Enter') $('userPhone').focus(); };
-$('userPhone').onkeydown = e => { if (e.key === 'Enter') $('room').focus(); };
-$('room').onkeydown = e => { if (e.key === 'Enter') login(); };
 
 function join(u, r, p) {
   user = u; room = r; phone = p || localStorage.getItem('sl_phone') || '';
@@ -288,12 +307,35 @@ function join(u, r, p) {
   switchTab('chat');
 }
 
+// إدارة حالة الأونلاين الحقيقية بدقة
 function setPresence() {
-  let ref = db.ref(`rooms/${room}/members/${user}`);
-  ref.set({ name: user, phone: phone, online: true, lastSeen: firebase.database.ServerValue.TIMESTAMP });
-  ref.onDisconnect().remove();
-  db.ref(`users/${user}`).update({ username: user, phone: phone, lastSeen: firebase.database.ServerValue.TIMESTAMP });
+  const myUserRef = db.ref(`users/${user}`);
+  const connectedRef = db.ref('.info/connected');
+
+  connectedRef.on('value', snap => {
+    if (snap.val() === true) {
+      myUserRef.onDisconnect().update({
+        online: false,
+        lastSeen: firebase.database.ServerValue.TIMESTAMP
+      });
+
+      myUserRef.update({
+        username: user,
+        phone: phone,
+        online: true,
+        currentRoom: room,
+        lastSeen: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
+  });
 }
+
+$('copyRoomBtn').onclick = () => {
+  if (room) {
+    navigator.clipboard.writeText(room);
+    toast('📋 تم نسخ كود الغرفة: ' + room);
+  }
+};
 
 function checkUser() {
   db.ref(`banned_users/${user}`).on('value', s => {
@@ -437,7 +479,6 @@ function send() {
 $('sendBtn').onclick = send;
 $('message').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
 
-// 🔍 التعديل الأساسي: البحث في قائمة جميع مستخدمي التطبيق (Global Users) 
 function listenMembers() {
   if (listeners.mem) db.ref('users').off('value', listeners.mem);
   listeners.mem = s => { allAppUsers = s.val() || {}; renderMembers(); };
@@ -452,8 +493,9 @@ function renderMembers() {
   Object.keys(allAppUsers).forEach(id => {
     let m = allAppUsers[id];
     let uName = m.username || id;
-    if (!m || uName === user) return; // عدم إظهار المستخدم الحالي نفسه
+    if (!m || uName === user) return;
     
+    let isOnline = m.online === true;
     let matchName = uName.toLowerCase().includes(q);
     let matchPhone = m.phone && m.phone.toLowerCase().includes(q);
     
@@ -462,9 +504,9 @@ function renderMembers() {
       el.className = 'member';
       el.innerHTML = `
         <div class="member-left">
-          <span class="dot"></span>
+          <span class="dot ${isOnline ? 'online-dot' : ''}"></span>
           <div>
-            <div><b>${esc(uName)}</b></div>
+            <div><b>${esc(uName)}</b> <small class="muted">(${isOnline ? 'متصل 🟢' : 'غير متصل ⚪'})</small></div>
             ${m.phone ? `<div class="muted">📱 ${esc(m.phone)}</div>` : ''}
           </div>
         </div>
@@ -474,7 +516,7 @@ function renderMembers() {
       box.appendChild(el);
     }
   });
-  if (!box.children.length) box.innerHTML = '<div class="empty">لا يوجد أعضاء مطابقون للبحث في التطبيق.</div>';
+  if (!box.children.length) box.innerHTML = '<div class="empty">لا يوجد أعضاء مطابقون للبحث.</div>';
 }
 $('memberSearch').oninput = renderMembers;
 
@@ -482,7 +524,6 @@ $('savePhoneBtn').onclick = () => {
   let p = $('profilePhone').value.trim();
   phone = p;
   localStorage.setItem('sl_phone', p);
-  db.ref(`rooms/${room}/members/${user}`).update({ phone: p });
   db.ref(`users/${user}`).update({ phone: p });
   toast('📱 تم حفظ رقم الهاتف');
 };
@@ -622,7 +663,6 @@ $('file').onchange = e => {
   r.readAsDataURL(f);
 };
 
-// 🎙️ تسجيل الصوت 🎙️
 $('micBtn').onclick = async () => {
   if (recording) {
     if (rec && rec.state !== 'inactive') rec.stop();
@@ -657,7 +697,7 @@ $('micBtn').onclick = async () => {
       
       let blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
       if (blob.size > 1500 * 1024) {
-        toast(' التسجيل كبير جداً (أكثر من 1.5 ميجابايت)');
+        toast('التسجيل كبير جداً');
       } else if (blob.size > 0) {
         let r = new FileReader();
         r.onload = () => {
@@ -669,7 +709,7 @@ $('micBtn').onclick = async () => {
           });
         };
         r.readAsDataURL(blob);
-        toast('🎙️ تم إرسال التسجيل الصوتى');
+        toast('🎙️ تم إرسال التسجيل الصوتي');
       }
       
       recording = false;
@@ -681,11 +721,10 @@ $('micBtn').onclick = async () => {
     recording = true;
     $('micBtn').textContent = '⏹️';
     $('micBtn').classList.add('mic-active');
-    toast('🎤 جاري التسجيل الآن... اضغط للتوقف والإرسال');
+    toast('🎤 جاري التسجيل...');
 
   } catch (err) {
-    console.error("Mic error:", err);
-    toast('تعذر الوصول للميكروفون، تأكد من إعطاء الصلاحية');
+    toast('تعذر الوصول للميكروفون');
   }
 };
 
@@ -717,7 +756,12 @@ function switchTab(t) {
 document.querySelectorAll('.nav button').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
 
 $('logoutBtn').onclick = () => {
-  if (room && user) db.ref(`rooms/${room}/members/${user}`).remove();
+  if (user) {
+    db.ref(`users/${user}`).update({
+      online: false,
+      lastSeen: firebase.database.ServerValue.TIMESTAMP
+    });
+  }
   localStorage.removeItem('sl_user');
   localStorage.removeItem('sl_room');
   localStorage.removeItem('sl_phone');
