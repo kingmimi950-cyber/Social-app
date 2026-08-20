@@ -161,7 +161,7 @@ audio { width: 100%; margin-top: 5px; height: 36px; }
   </section>
 
   <section id="tab-members" class="tab">
-    <input id="memberSearch" class="field" placeholder="🔍 ابحث بالاسم أو رقم الهاتف">
+    <input id="memberSearch" class="field" placeholder="🔍 ابحث في أعضاء التطبيق بالاسم أو رقم الهاتف">
     <div id="members"></div>
   </section>
 
@@ -215,13 +215,14 @@ audio { width: 100%; margin-top: 5px; height: 36px; }
 
 <div id="toast" class="toast"></div>
 </div>
- <script>
+
+<script>
 const firebaseConfig = { databaseURL: "https://football-game-2176c-default-rtdb.firebaseio.com" };
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const $ = id => document.getElementById(id);
-let user = "", phone = "", room = "", chatPath = "", settings = {}, members = {}, badWords = [], mutedUntil = 0;
+let user = "", phone = "", room = "", chatPath = "", settings = {}, allAppUsers = {}, badWords = [], mutedUntil = 0;
 let recording = false, rec = null, chunks = [], mediaStream = null;
 let listeners = {};
 
@@ -328,6 +329,7 @@ function composerState() {
   $('micBtn').disabled = off;
   $('message').placeholder = settings.isFrozen ? '🛑 الشات مجمد' : mutedUntil > Date.now() ? '🔇 أنت مكتوم' : 'اكتب رسالتك...';
 }
+
 function listenMessages() {
   if (listeners.msg) db.ref(chatPath).off('value', listeners.msg);
   listeners.msg = s => {
@@ -435,10 +437,11 @@ function send() {
 $('sendBtn').onclick = send;
 $('message').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
 
+// 🔍 التعديل الأساسي: البحث في قائمة جميع مستخدمي التطبيق (Global Users) 
 function listenMembers() {
-  if (listeners.mem) db.ref(`rooms/${room}/members`).off('value', listeners.mem);
-  listeners.mem = s => { members = s.val() || {}; renderMembers(); };
-  db.ref(`rooms/${room}/members`).on('value', listeners.mem);
+  if (listeners.mem) db.ref('users').off('value', listeners.mem);
+  listeners.mem = s => { allAppUsers = s.val() || {}; renderMembers(); };
+  db.ref('users').on('value', listeners.mem);
 }
 
 function renderMembers() {
@@ -446,10 +449,12 @@ function renderMembers() {
   box.innerHTML = '';
   let q = $('memberSearch').value.toLowerCase().trim();
   
-  Object.keys(members).forEach(id => {
-    let m = members[id];
-    if (!m || m.name === user) return;
-    let matchName = m.name && m.name.toLowerCase().includes(q);
+  Object.keys(allAppUsers).forEach(id => {
+    let m = allAppUsers[id];
+    let uName = m.username || id;
+    if (!m || uName === user) return; // عدم إظهار المستخدم الحالي نفسه
+    
+    let matchName = uName.toLowerCase().includes(q);
     let matchPhone = m.phone && m.phone.toLowerCase().includes(q);
     
     if (!q || matchName || matchPhone) {
@@ -459,17 +464,17 @@ function renderMembers() {
         <div class="member-left">
           <span class="dot"></span>
           <div>
-            <div><b>${esc(m.name)}</b></div>
+            <div><b>${esc(uName)}</b></div>
             ${m.phone ? `<div class="muted">📱 ${esc(m.phone)}</div>` : ''}
           </div>
         </div>
         <button class="small">خاص 🔒</button>
       `;
-      el.querySelector('button').onclick = () => privateChat(m.name);
+      el.querySelector('button').onclick = () => privateChat(uName);
       box.appendChild(el);
     }
   });
-  if (!box.children.length) box.innerHTML = '<div class="empty">لا يوجد أعضاء مطابقون للبحث.</div>';
+  if (!box.children.length) box.innerHTML = '<div class="empty">لا يوجد أعضاء مطابقون للبحث في التطبيق.</div>';
 }
 $('memberSearch').oninput = renderMembers;
 
@@ -500,7 +505,8 @@ function publicChat() {
   listenMessages();
 }
 $('backBtn').onclick = publicChat;
- function listenPin() {
+
+function listenPin() {
   db.ref(`rooms/${room}/pinned`).on('value', s => {
     let v = s.val();
     $('pinned').classList.toggle('hidden', !v);
@@ -616,7 +622,7 @@ $('file').onchange = e => {
   r.readAsDataURL(f);
 };
 
-// 🎙️ إصلاح نظام الميكروفون المطور والكامل 🎙️
+// 🎙️ تسجيل الصوت 🎙️
 $('micBtn').onclick = async () => {
   if (recording) {
     if (rec && rec.state !== 'inactive') rec.stop();
@@ -730,4 +736,3 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
