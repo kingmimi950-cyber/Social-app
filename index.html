@@ -112,21 +112,6 @@ body { display: flex; justify-content: center; align-items: center; }
 .empty { text-align: center; padding: 30px; color: var(--muted); }
 audio { width: 100%; margin-top: 5px; height: 36px; }
 </style>
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "97de810e-c1fa-4deb-977a-dc7211b8abe0",
-      safari_web_id: "web.onesignal.auto.12f40fc9-13d7-4ca9-8e4a-0a7d50f473bf",
-      notifyButton: {
-        enable: true,
-      },
-    });
-  });
-</script>
-
-
 </head>
 <body>
 <div id="maintenance" class="block hidden"><div class="card" style="text-align:center"><h2>🛠️ التطبيق تحت الصيانة</h2><p class="muted">حاول الدخول مرة أخرى لاحقاً.</p></div></div>
